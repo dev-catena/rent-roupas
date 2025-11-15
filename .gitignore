@@ -1,0 +1,46 @@
+# Laravel
+/vendor/
+/node_modules/
+/.env
+/.env.backup
+/.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+.DS_Store
+Thumbs.db
+/storage/*.key
+/storage/framework/
+/storage/logs/
+/public/storage
+/public/hot
+
+# React Native / Expo
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/npm-debug.*
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/*.orig.*
+mobile/web-build/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
