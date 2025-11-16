@@ -18,18 +18,25 @@ export default function MyItemsScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadMyItems();
-  }, []);
-
   // Recarrega quando a tela recebe foco (ex: depois de editar)
   useFocusEffect(
     React.useCallback(() => {
-      if (!loading) {
-        loadMyItems();
-      }
+      loadMyItems();
     }, [])
   );
+
+  // Polling automático a cada 20 segundos
+  useEffect(() => {
+    loadMyItems();
+
+    const interval = setInterval(() => {
+      if (!refreshing) {
+        loadMyItems();
+      }
+    }, 20000); // 20 segundos
+
+    return () => clearInterval(interval);
+  }, [refreshing]);
 
   async function loadMyItems() {
     try {

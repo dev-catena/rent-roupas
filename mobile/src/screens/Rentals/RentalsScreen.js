@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
 import { format } from 'date-fns';
 
@@ -16,8 +17,22 @@ export default function RentalsScreen({ navigation }) {
   const [lendings, setLendings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Recarrega dados quando a tela ganha foco
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
+
+  // Polling automático a cada 15 segundos
   useEffect(() => {
     loadData();
+
+    const interval = setInterval(() => {
+      loadData();
+    }, 15000); // 15 segundos
+
+    return () => clearInterval(interval);
   }, []);
 
   async function loadData() {
