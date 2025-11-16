@@ -170,8 +170,22 @@ export default function ChatDetailScreen({ route, navigation }) {
   }
 
   const isRecipient = negotiation.recipient_id === user?.id;
+  const isInitiator = negotiation.initiator_id === user?.id;
+  const isProfessional = negotiation.professional_id === user?.professional?.id && user?.professional?.id != null;
   const isActive = negotiation.status === 'active';
-  const otherUser = isRecipient ? negotiation.initiator : negotiation.recipient;
+  
+  // Determina com quem o usuário está conversando
+  let otherUser;
+  if (isProfessional) {
+    // Se for o profissional, conversa com quem iniciou a negociação
+    otherUser = negotiation.initiator;
+  } else if (isRecipient) {
+    // Se for o recipient, conversa com quem iniciou
+    otherUser = negotiation.initiator;
+  } else {
+    // Se for o initiator, conversa com o recipient
+    otherUser = negotiation.recipient;
+  }
 
   return (
     <KeyboardAvoidingView
@@ -227,7 +241,7 @@ export default function ChatDetailScreen({ route, navigation }) {
             </View>
           </View>
           
-          {!isRecipient && (
+          {isInitiator && (
             <View style={styles.professionalActions}>
               <TouchableOpacity 
                 style={styles.changeProfessionalButton} 
@@ -255,13 +269,22 @@ export default function ChatDetailScreen({ route, navigation }) {
               </TouchableOpacity>
             </View>
           )}
+          
+          {isProfessional && (
+            <View style={styles.professionalNote}>
+              <Text style={styles.professionalNoteText}>
+                💼 Você foi adicionado(a) como profissional nesta negociação. 
+                Use o chat para combinar os detalhes do serviço.
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
       {/* Ações da negociação */}
-      {isActive && (
+      {isActive && !isProfessional && (
         <View style={styles.actionsBar}>
-          {!isRecipient && !negotiation?.professional && (
+          {isInitiator && !negotiation?.professional && (
             <TouchableOpacity style={styles.actionButton} onPress={handleRequestAdjustment}>
               <Text style={styles.actionButtonText}>✂️ Solicitar Ajuste</Text>
             </TouchableOpacity>
@@ -425,6 +448,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#fff',
+  },
+  professionalNote: {
+    padding: 12,
+    backgroundColor: '#fef3c7',
+  },
+  professionalNoteText: {
+    fontSize: 13,
+    color: '#92400e',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   actionsBar: {
     flexDirection: 'row',

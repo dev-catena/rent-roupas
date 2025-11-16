@@ -19,6 +19,7 @@ class NegotiationController extends Controller
             'clothingItem.primaryPhoto',
             'initiator',
             'recipient',
+            'professional.user',
             'messages' => function($query) {
                 $query->latest()->limit(1);
             }
@@ -26,6 +27,11 @@ class NegotiationController extends Controller
         ->where(function($query) use ($user) {
             $query->where('initiator_id', $user->id)
                   ->orWhere('recipient_id', $user->id);
+            
+            // Se o usuário é profissional, inclui negociações onde ele foi adicionado
+            if ($user->professional) {
+                $query->orWhere('professional_id', $user->professional->id);
+            }
         })
         ->orderBy('updated_at', 'desc')
         ->paginate(20);
@@ -57,6 +63,11 @@ class NegotiationController extends Controller
         ->where(function($query) use ($user) {
             $query->where('initiator_id', $user->id)
                   ->orWhere('recipient_id', $user->id);
+            
+            // Se o usuário é profissional, permite ver negociações onde ele foi adicionado
+            if ($user->professional) {
+                $query->orWhere('professional_id', $user->professional->id);
+            }
         })
         ->findOrFail($id);
 
@@ -146,6 +157,11 @@ class NegotiationController extends Controller
         $negotiation = Negotiation::where(function($query) use ($user) {
             $query->where('initiator_id', $user->id)
                   ->orWhere('recipient_id', $user->id);
+            
+            // Se o usuário é profissional, permite enviar mensagens nas negociações onde ele foi adicionado
+            if ($user->professional) {
+                $query->orWhere('professional_id', $user->professional->id);
+            }
         })
         ->findOrFail($id);
 
