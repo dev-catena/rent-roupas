@@ -189,12 +189,12 @@ export default function ProfessionalsListScreen({ route, navigation }) {
           <View style={styles.cardFooter}>
             <View style={styles.priceContainer}>
               <Text style={styles.priceLabel}>A partir de</Text>
-              <Text style={styles.price}>R$ {item.base_price}</Text>
+              <Text style={styles.price}>{`R$ ${item.base_price}`}</Text>
             </View>
-
+            
             {item.distance && typeof item.distance === 'number' && (
               <View style={styles.distanceContainer}>
-                <Text style={styles.distance}>📍 {item.distance.toFixed(1)} km</Text>
+                <Text style={styles.distance}>{`📍 ${item.distance.toFixed(1)} km`}</Text>
               </View>
             )}
           </View>

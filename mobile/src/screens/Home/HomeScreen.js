@@ -77,19 +77,19 @@ export default function HomeScreen({ navigation }) {
             {String(item.title || 'Sem título')}
           </Text>
           <Text style={styles.cardPrice}>
-            R$ {String(item.price_per_day || '0')}/dia
+            {`R$ ${String(item.price_per_day || '0')}/dia`}
           </Text>
           
           {item.distance && typeof item.distance === 'number' && (
             <Text style={styles.cardDistance}>
-              📍 {item.distance.toFixed(1)} km de você
+              {`📍 ${item.distance.toFixed(1)} km de você`}
             </Text>
           )}
           
           {item.match_score && typeof item.match_score === 'number' && item.match_score > 0 && (
             <View style={styles.matchBadge}>
               <Text style={styles.matchText}>
-                {Math.round(item.match_score)}% compatível
+                {`${Math.round(item.match_score)}% compatível`}
               </Text>
             </View>
           )}

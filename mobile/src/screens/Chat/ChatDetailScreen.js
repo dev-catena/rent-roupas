@@ -390,7 +390,7 @@ export default function ChatDetailScreen({ route, navigation }) {
           <View style={styles.headerItem}>
             <Text style={styles.headerLabel}>Valor/dia</Text>
             <Text style={styles.headerValue}>
-              R$ {negotiation.proposed_price || negotiation.clothing_item.price_per_day}
+              {`R$ ${negotiation.proposed_price || negotiation.clothing_item.price_per_day}`}
             </Text>
           </View>
           
@@ -415,9 +415,9 @@ export default function ChatDetailScreen({ route, navigation }) {
           <View style={styles.professionalBanner}>
             <View style={styles.professionalInfo}>
               <Text style={styles.professionalText}>
-                ✂️ Profissional: {negotiation.professional.user.name}
+                {`✂️ Profissional: ${negotiation.professional.user.name}`}
               </Text>
-              <Text style={styles.professionalPrice}>R$ {negotiation.professional.base_price}</Text>
+              <Text style={styles.professionalPrice}>{`R$ ${negotiation.professional.base_price}`}</Text>
             </View>
           </View>
           

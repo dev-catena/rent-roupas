@@ -10,6 +10,8 @@ class QRCodeCheckpoint extends Model
 {
     use HasFactory;
 
+    protected $table = 'qr_code_checkpoints'; // Define o nome correto da tabela
+
     protected $fillable = [
         'negotiation_id',
         'type',

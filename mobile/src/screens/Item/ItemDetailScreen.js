@@ -157,7 +157,7 @@ export default function ItemDetailScreen({ route, navigation }) {
               <Text style={styles.ownerName}>{item.user.name}</Text>
               {item.user.city && (
                 <Text style={styles.ownerLocation}>
-                  📍 {item.user.city}, {item.user.state}
+                  {`📍 ${item.user.city}, ${item.user.state}`}
                 </Text>
               )}
             </View>
@@ -176,7 +176,7 @@ export default function ItemDetailScreen({ route, navigation }) {
               />
             </View>
             <Text style={styles.compatibilityText}>
-              {Math.round(item.match_score)}% compatível com suas medidas
+              {`${Math.round(item.match_score)}% compatível com suas medidas`}
             </Text>
           </View>
         )}
