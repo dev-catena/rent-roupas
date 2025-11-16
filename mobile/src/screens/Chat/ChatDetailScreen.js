@@ -71,6 +71,46 @@ export default function ChatDetailScreen({ route, navigation }) {
     navigation.navigate('ProfessionalsList', { negotiationId });
   }
 
+  async function handleConfirmProfessional() {
+    Alert.alert(
+      'Confirmar Profissional',
+      `Deseja confirmar ${negotiation.professional.user.name} para fazer os ajustes?\n\nApós confirmar, você poderá gerar um QR Code para entregar a peça ao profissional.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              const response = await api.put(`/negotiations/${negotiationId}/confirm-professional`);
+              
+              if (response.data.success) {
+                Alert.alert(
+                  '✅ Profissional Confirmado!',
+                  'Agora você pode gerar o QR Code para entregar a peça ao profissional.',
+                  [
+                    {
+                      text: 'Ver QR Code',
+                      onPress: () => navigation.navigate('QRCodeGenerate', { 
+                        negotiationId,
+                        type: 'delivery_to_professional'
+                      })
+                    },
+                    { text: 'Mais Tarde' }
+                  ]
+                );
+                // Recarrega a negociação
+                loadNegotiation();
+              }
+            } catch (error) {
+              console.error('Erro ao confirmar profissional:', error);
+              Alert.alert('Erro', error.response?.data?.message || 'Não foi possível confirmar o profissional');
+            }
+          }
+        }
+      ]
+    );
+  }
+
   async function handleAccept() {
     Alert.alert(
       'Aceitar Negociação',
@@ -251,19 +291,7 @@ export default function ChatDetailScreen({ route, navigation }) {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.confirmProfessionalButton} 
-                onPress={() => Alert.alert(
-                  'Confirmar Profissional',
-                  `Deseja confirmar ${negotiation.professional.user.name} para fazer os ajustes?\n\nVocê pode enviar uma mensagem para combinar os detalhes.`,
-                  [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { 
-                      text: 'Confirmar',
-                      onPress: () => {
-                        Alert.alert('✅ Profissional Confirmado!', 'Agora você pode conversar com o profissional para combinar os ajustes.');
-                      }
-                    }
-                  ]
-                )}
+                onPress={() => handleConfirmProfessional()}
               >
                 <Text style={styles.confirmProfessionalButtonText}>✅ Confirmar Profissional</Text>
               </TouchableOpacity>
