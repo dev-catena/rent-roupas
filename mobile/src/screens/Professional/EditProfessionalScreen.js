@@ -13,6 +13,47 @@ import { useAuth } from '../../contexts/AuthContext';
 import * as Location from 'expo-location';
 import api from '../../config/api';
 
+// Função para converter nome do estado para sigla
+function getStateAbbreviation(stateName) {
+  const stateMap = {
+    'Acre': 'AC',
+    'Alagoas': 'AL',
+    'Amapá': 'AP',
+    'Amazonas': 'AM',
+    'Bahia': 'BA',
+    'Ceará': 'CE',
+    'Distrito Federal': 'DF',
+    'Espírito Santo': 'ES',
+    'Goiás': 'GO',
+    'Maranhão': 'MA',
+    'Mato Grosso': 'MT',
+    'Mato Grosso do Sul': 'MS',
+    'Minas Gerais': 'MG',
+    'Pará': 'PA',
+    'Paraíba': 'PB',
+    'Paraná': 'PR',
+    'Pernambuco': 'PE',
+    'Piauí': 'PI',
+    'Rio de Janeiro': 'RJ',
+    'Rio Grande do Norte': 'RN',
+    'Rio Grande do Sul': 'RS',
+    'Rondônia': 'RO',
+    'Roraima': 'RR',
+    'Santa Catarina': 'SC',
+    'São Paulo': 'SP',
+    'Sergipe': 'SE',
+    'Tocantins': 'TO'
+  };
+  
+  // Se já é uma sigla (2 letras), retorna como está
+  if (stateName && stateName.length === 2) {
+    return stateName.toUpperCase();
+  }
+  
+  // Retorna a sigla ou o valor original se não encontrar
+  return stateMap[stateName] || stateName || '';
+}
+
 export default function EditProfessionalScreen({ navigation }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);

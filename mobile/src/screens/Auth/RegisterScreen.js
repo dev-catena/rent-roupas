@@ -15,6 +15,47 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import * as Location from 'expo-location';
 
+// Função para converter nome do estado para sigla
+function getStateAbbreviation(stateName) {
+  const stateMap = {
+    'Acre': 'AC',
+    'Alagoas': 'AL',
+    'Amapá': 'AP',
+    'Amazonas': 'AM',
+    'Bahia': 'BA',
+    'Ceará': 'CE',
+    'Distrito Federal': 'DF',
+    'Espírito Santo': 'ES',
+    'Goiás': 'GO',
+    'Maranhão': 'MA',
+    'Mato Grosso': 'MT',
+    'Mato Grosso do Sul': 'MS',
+    'Minas Gerais': 'MG',
+    'Pará': 'PA',
+    'Paraíba': 'PB',
+    'Paraná': 'PR',
+    'Pernambuco': 'PE',
+    'Piauí': 'PI',
+    'Rio de Janeiro': 'RJ',
+    'Rio Grande do Norte': 'RN',
+    'Rio Grande do Sul': 'RS',
+    'Rondônia': 'RO',
+    'Roraima': 'RR',
+    'Santa Catarina': 'SC',
+    'São Paulo': 'SP',
+    'Sergipe': 'SE',
+    'Tocantins': 'TO'
+  };
+  
+  // Se já é uma sigla (2 letras), retorna como está
+  if (stateName && stateName.length === 2) {
+    return stateName.toUpperCase();
+  }
+  
+  // Retorna a sigla ou o valor original se não encontrar
+  return stateMap[stateName] || stateName || '';
+}
+
 export default function RegisterScreen({ navigation }) {
   const { signUp } = useAuth();
   const [step, setStep] = useState(1);
@@ -83,7 +124,7 @@ export default function RegisterScreen({ navigation }) {
         
         setAddress(streetAddress || geocode.name || '');
         setCity(geocode.city || '');
-        setState(geocode.region || '');
+        setState(getStateAbbreviation(geocode.region));
         setZipcode(geocode.postalCode || '');
         
         Alert.alert('Sucesso!', 'Localização e endereço obtidos automaticamente! ✅');
@@ -127,7 +168,7 @@ export default function RegisterScreen({ navigation }) {
         
         setWorkshopAddress(streetAddress || geocode.name || '');
         setCity(geocode.city || '');
-        setState(geocode.region || '');
+        setState(getStateAbbreviation(geocode.region));
         setZipcode(geocode.postalCode || '');
         
         Alert.alert('Sucesso!', 'Localização e endereço do ateliê obtidos automaticamente! ✅');
