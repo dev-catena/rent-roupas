@@ -36,58 +36,18 @@ export default function ChatDetailScreen({ route, navigation }) {
     }, [negotiationId])
   );
 
-  // Long-polling para atualizações em tempo real
+  // Polling otimizado para atualizações
   useEffect(() => {
     loadNegotiation();
     loadCheckpoints();
 
-    let isActive = true;
-    let lastCheckpointId = 0;
+    // Polling mais frequente no chat (5 segundos)
+    const interval = setInterval(() => {
+      loadCheckpoints();
+      loadNegotiation();
+    }, 5000); // 5 segundos
 
-    async function startLongPolling() {
-      while (isActive) {
-        try {
-          const response = await api.get(
-            `/negotiations/${negotiationId}/updates/poll?last_checkpoint_id=${lastCheckpointId}`,
-            { timeout: 30000 } // 30 segundos timeout
-          );
-
-          if (response.data.success && response.data.has_updates) {
-            console.log('📡 Atualização em tempo real recebida!');
-            
-            // Atualiza checkpoints
-            if (response.data.checkpoints && response.data.checkpoints.length > 0) {
-              setCheckpoints(prev => {
-                const newCheckpoints = response.data.checkpoints;
-                lastCheckpointId = Math.max(...newCheckpoints.map(c => c.id));
-                
-                // Merge sem duplicatas
-                const existingIds = prev.map(c => c.id);
-                const filtered = newCheckpoints.filter(c => !existingIds.includes(c.id));
-                return [...prev, ...filtered];
-              });
-            }
-            
-            // Atualiza negociação
-            if (response.data.negotiation) {
-              setNegotiation(response.data.negotiation);
-            }
-          }
-        } catch (error) {
-          if (error.code !== 'ECONNABORTED') {
-            console.error('Erro no long-polling:', error);
-          }
-          // Aguarda 2 segundos antes de tentar novamente em caso de erro
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      }
-    }
-
-    startLongPolling();
-
-    return () => {
-      isActive = false;
-    };
+    return () => clearInterval(interval);
   }, [negotiationId]);
 
   async function loadCheckpoints() {
