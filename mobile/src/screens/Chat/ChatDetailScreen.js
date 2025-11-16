@@ -156,12 +156,14 @@ export default function ChatDetailScreen({ route, navigation }) {
                deliveryCheckpoint?.status === 'scanned' ? '✅ Recebido' :
                'Aguardando...'}
             </Text>
-            {!deliveryCheckpoint && isInitiator && (
+            {isInitiator && (
               <TouchableOpacity 
                 style={styles.trackingButton}
                 onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'delivery_to_professional' })}
               >
-                <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+                <Text style={styles.trackingButtonText}>
+                  {!deliveryCheckpoint ? 'Gerar QR Code' : 'Ver QR Code'}
+                </Text>
               </TouchableOpacity>
             )}
             {deliveryCheckpoint?.status === 'pending' && isProfessional && (
@@ -190,12 +192,14 @@ export default function ChatDetailScreen({ route, navigation }) {
                  returnCheckpoint?.status === 'scanned' ? '✅ Recebido de volta' :
                  'Aguardando ajustes...'}
               </Text>
-              {!returnCheckpoint && isProfessional && (
+              {isProfessional && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
                   onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_from_professional' })}
                 >
-                  <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+                  <Text style={styles.trackingButtonText}>
+                    {!returnCheckpoint ? 'Gerar QR Code' : 'Ver QR Code'}
+                  </Text>
                 </TouchableOpacity>
               )}
               {returnCheckpoint?.status === 'pending' && isInitiator && (
@@ -225,12 +229,14 @@ export default function ChatDetailScreen({ route, navigation }) {
                  returnOwnerCheckpoint?.status === 'scanned' ? '✅ Ciclo Completo!' :
                  'Aguardando...'}
               </Text>
-              {!returnOwnerCheckpoint && isInitiator && (
+              {isInitiator && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
                   onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_to_owner' })}
                 >
-                  <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+                  <Text style={styles.trackingButtonText}>
+                    {!returnOwnerCheckpoint ? 'Gerar QR Code' : 'Ver QR Code'}
+                  </Text>
                 </TouchableOpacity>
               )}
               {returnOwnerCheckpoint?.status === 'pending' && isRecipient && (
