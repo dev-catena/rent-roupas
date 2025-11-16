@@ -12,6 +12,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../config/api';
 import { format } from 'date-fns';
@@ -27,9 +28,24 @@ export default function ChatDetailScreen({ route, navigation }) {
   const [checkpoints, setCheckpoints] = useState([]);
   const flatListRef = useRef(null);
 
+  // Recarrega dados quando a tela ganha foco
+  useFocusEffect(
+    React.useCallback(() => {
+      loadNegotiation();
+      loadCheckpoints();
+    }, [negotiationId])
+  );
+
+  // Polling automático a cada 10 segundos
   useEffect(() => {
     loadNegotiation();
     loadCheckpoints();
+
+    const interval = setInterval(() => {
+      loadCheckpoints(); // Recarrega apenas checkpoints (mais leve)
+    }, 10000); // 10 segundos
+
+    return () => clearInterval(interval);
   }, [negotiationId]);
 
   async function loadCheckpoints() {
@@ -169,7 +185,12 @@ export default function ChatDetailScreen({ route, navigation }) {
             {deliveryCheckpoint?.status === 'pending' && isProfessional && (
               <TouchableOpacity 
                 style={styles.trackingButton}
-                onPress={() => navigation.navigate('QRCodeScan')}
+                onPress={() => navigation.navigate('QRCodeScan', { 
+                  onScanSuccess: () => {
+                    loadNegotiation();
+                    loadCheckpoints();
+                  }
+                })}
               >
                 <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
               </TouchableOpacity>
@@ -205,7 +226,12 @@ export default function ChatDetailScreen({ route, navigation }) {
               {returnCheckpoint?.status === 'pending' && isInitiator && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
-                  onPress={() => navigation.navigate('QRCodeScan')}
+                  onPress={() => navigation.navigate('QRCodeScan', { 
+                    onScanSuccess: () => {
+                      loadNegotiation();
+                      loadCheckpoints();
+                    }
+                  })}
                 >
                   <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
                 </TouchableOpacity>
@@ -242,7 +268,12 @@ export default function ChatDetailScreen({ route, navigation }) {
               {returnOwnerCheckpoint?.status === 'pending' && isRecipient && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
-                  onPress={() => navigation.navigate('QRCodeScan')}
+                  onPress={() => navigation.navigate('QRCodeScan', { 
+                    onScanSuccess: () => {
+                      loadNegotiation();
+                      loadCheckpoints();
+                    }
+                  })}
                 >
                   <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
                 </TouchableOpacity>

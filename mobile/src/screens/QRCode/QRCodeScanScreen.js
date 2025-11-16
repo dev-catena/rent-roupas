@@ -9,7 +9,7 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '../../config/api';
 
-export default function QRCodeScanScreen({ navigation }) {
+export default function QRCodeScanScreen({ route, navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -33,6 +33,11 @@ export default function QRCodeScanScreen({ navigation }) {
 
       if (response.data.success) {
         const checkpoint = response.data.data;
+        
+        // Notifica a tela anterior para atualizar
+        if (route.params?.onScanSuccess) {
+          route.params.onScanSuccess();
+        }
         
         Alert.alert(
           '✅ QR Code Escaneado!',
