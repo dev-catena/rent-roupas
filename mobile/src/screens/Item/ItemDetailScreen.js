@@ -164,14 +164,14 @@ export default function ItemDetailScreen({ route, navigation }) {
           </View>
         </View>
 
-        {item.match_score && (
+        {item.match_score && typeof item.match_score === 'number' && item.match_score > 0 && (
           <View style={styles.compatibilityContainer}>
             <Text style={styles.compatibilityTitle}>Compatibilidade</Text>
             <View style={styles.compatibilityBar}>
               <View
                 style={[
                   styles.compatibilityFill,
-                  { width: `${item.match_score}%` },
+                  { width: `${Math.min(100, Math.max(0, item.match_score))}%` },
                 ]}
               />
             </View>

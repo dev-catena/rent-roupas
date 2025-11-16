@@ -171,9 +171,9 @@ export default function ProfessionalsListScreen({ route, navigation }) {
               <Text style={styles.price}>R$ {item.base_price}</Text>
             </View>
 
-            {item.distance && (
+            {item.distance && typeof item.distance === 'number' && (
               <View style={styles.distanceContainer}>
-                <Text style={styles.distance}>📍 {item.distance} km</Text>
+                <Text style={styles.distance}>📍 {item.distance.toFixed(1)} km</Text>
               </View>
             )}
           </View>

@@ -53,7 +53,11 @@ export default function HomeScreen({ navigation }) {
   }
 
   function renderItem({ item }) {
-    if (!item) return null;
+    // Proteção robusta contra itens inválidos
+    if (!item || !item.id) {
+      console.warn('Item inválido no renderItem:', item);
+      return null;
+    }
     
     return (
       <TouchableOpacity
@@ -70,19 +74,19 @@ export default function HomeScreen({ navigation }) {
         
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle} numberOfLines={2}>
-            {item.title || 'Sem título'}
+            {String(item.title || 'Sem título')}
           </Text>
           <Text style={styles.cardPrice}>
-            R$ {item.price_per_day || '0'}/dia
+            R$ {String(item.price_per_day || '0')}/dia
           </Text>
           
-          {item.distance && (
+          {item.distance && typeof item.distance === 'number' && (
             <Text style={styles.cardDistance}>
-              📍 {item.distance} km de você
+              📍 {item.distance.toFixed(1)} km de você
             </Text>
           )}
           
-          {item.match_score && (
+          {item.match_score && typeof item.match_score === 'number' && item.match_score > 0 && (
             <View style={styles.matchBadge}>
               <Text style={styles.matchText}>
                 {Math.round(item.match_score)}% compatível
