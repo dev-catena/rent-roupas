@@ -298,5 +298,43 @@ class NegotiationController extends Controller
             'data' => $negotiation
         ]);
     }
+
+    public function confirmProfessional(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        $negotiation = Negotiation::with('professional.user')
+            ->where('initiator_id', $user->id) // Apenas quem iniciou pode confirmar
+            ->findOrFail($id);
+
+        if (!$negotiation->professional_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nenhum profissional foi adicionado a esta negociação'
+            ], 400);
+        }
+
+        if ($negotiation->professional_confirmed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'O profissional já foi confirmado anteriormente'
+            ], 400);
+        }
+
+        // Confirma o profissional
+        $negotiation->update([
+            'professional_confirmed' => true,
+            'professional_confirmed_at' => now(),
+        ]);
+
+        // TODO: Enviar notificação para o profissional
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profissional confirmado com sucesso!',
+            'data' => $negotiation->fresh()
+        ]);
+    }
 }
+
 

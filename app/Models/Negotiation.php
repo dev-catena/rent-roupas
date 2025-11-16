@@ -16,6 +16,8 @@ class Negotiation extends Model
         'initiator_id',
         'recipient_id',
         'professional_id',
+        'professional_confirmed',
+        'professional_confirmed_at',
         'type',
         'status',
         'proposed_price',
@@ -30,6 +32,8 @@ class Negotiation extends Model
         'proposed_price' => 'decimal:2',
         'proposed_start_date' => 'date',
         'proposed_end_date' => 'date',
+        'professional_confirmed' => 'boolean',
+        'professional_confirmed_at' => 'datetime',
         'responded_at' => 'datetime',
         'closed_at' => 'datetime',
     ];
@@ -62,6 +66,11 @@ class Negotiation extends Model
     public function messages()
     {
         return $this->hasMany(NegotiationMessage::class);
+    }
+
+    public function checkpoints()
+    {
+        return $this->hasMany(QRCodeCheckpoint::class);
     }
 
     // Scopes

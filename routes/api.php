@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ProfessionalController;
 use App\Http\Controllers\Api\NegotiationController;
 use App\Http\Controllers\Api\MatchingController;
 use App\Http\Controllers\Api\VirtualTryOnController;
+use App\Http\Controllers\Api\QRCodeController;
 
 // Rotas públicas
 Route::post('/register', [AuthController::class, 'register']);
@@ -66,6 +67,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/negotiations/{id}/accept', [NegotiationController::class, 'accept']);
     Route::put('/negotiations/{id}/reject', [NegotiationController::class, 'reject']);
     Route::put('/negotiations/{id}/professional', [NegotiationController::class, 'addProfessional']);
+    Route::put('/negotiations/{id}/confirm-professional', [NegotiationController::class, 'confirmProfessional']);
+    
+    // QR Codes / Tracking
+    Route::post('/negotiations/{id}/qrcode/delivery-to-professional', [QRCodeController::class, 'generateDeliveryToProfessional']);
+    Route::post('/negotiations/{id}/qrcode/return-from-professional', [QRCodeController::class, 'generateReturnFromProfessional']);
+    Route::post('/negotiations/{id}/qrcode/return-to-owner', [QRCodeController::class, 'generateReturnToOwner']);
+    Route::post('/qrcode/scan', [QRCodeController::class, 'scanQRCode']);
+    Route::get('/negotiations/{id}/checkpoints', [QRCodeController::class, 'getCheckpoints']);
     
     // Virtual Try-On
     Route::post('/virtual-try-on', [VirtualTryOnController::class, 'tryOn']);
