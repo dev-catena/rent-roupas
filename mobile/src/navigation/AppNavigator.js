@@ -21,6 +21,8 @@ import EditProfessionalScreen from '../screens/Professional/EditProfessionalScre
 import ProfessionalsListScreen from '../screens/Professional/ProfessionalsListScreen';
 import RatingScreen from '../screens/Rating/RatingScreen';
 import VirtualTryOnScreen from '../screens/VirtualTryOn/VirtualTryOnScreen';
+import QRCodeGenerateScreen from '../screens/QRCode/QRCodeGenerateScreen';
+import QRCodeScanScreen from '../screens/QRCode/QRCodeScanScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -148,6 +150,16 @@ function ProfileStack() {
         name="Rating" 
         component={RatingScreen}
         options={{ title: 'Avaliar' }}
+      />
+      <Stack.Screen 
+        name="QRCodeGenerate" 
+        component={QRCodeGenerateScreen}
+        options={{ title: 'QR Code' }}
+      />
+      <Stack.Screen 
+        name="QRCodeScan" 
+        component={QRCodeScanScreen}
+        options={{ title: 'Escanear QR Code', headerShown: false }}
       />
     </Stack.Navigator>
   );
