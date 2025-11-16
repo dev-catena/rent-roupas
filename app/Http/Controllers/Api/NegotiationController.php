@@ -15,6 +15,9 @@ class NegotiationController extends Controller
     {
         $user = $request->user();
         
+        // Carrega o relacionamento professional do usuário
+        $user->load('professional');
+        
         $negotiations = Negotiation::with([
             'clothingItem.primaryPhoto',
             'initiator',

@@ -51,7 +51,33 @@ export default function ChatsScreen({ navigation }) {
   }
 
   function renderItem({ item }) {
-    const otherUser = item.initiator.id === user?.id ? item.recipient : item.initiator;
+    // Determina qual usuário mostrar como "outro usuário" na conversa
+    let otherUser = null;
+    
+    // Verifica se o usuário atual é o profissional desta negociação
+    const isCurrentUserProfessional = item.professional?.user?.id === user?.id;
+    const isCurrentUserInitiator = item.initiator?.id === user?.id;
+    const isCurrentUserRecipient = item.recipient?.id === user?.id;
+    
+    if (isCurrentUserProfessional) {
+      // Se o usuário atual é o profissional, mostra o initiator (ou recipient se initiator for ele mesmo)
+      otherUser = isCurrentUserInitiator ? item.recipient : item.initiator;
+    } else if (isCurrentUserInitiator) {
+      // Se o usuário atual é o initiator, mostra o profissional (se houver) ou o recipient
+      otherUser = item.professional?.user || item.recipient;
+    } else if (isCurrentUserRecipient) {
+      // Se o usuário atual é o recipient, mostra o profissional (se houver) ou o initiator
+      otherUser = item.professional?.user || item.initiator;
+    } else {
+      // Fallback: lógica padrão
+      otherUser = item.initiator?.id === user?.id ? item.recipient : item.initiator;
+    }
+    
+    // Garante que otherUser existe e tem nome
+    if (!otherUser || !otherUser.name) {
+      otherUser = item.initiator || item.recipient || { name: 'Usuário', id: 0 };
+    }
+    
     const lastMessage = item.messages && item.messages.length > 0 ? item.messages[0] : null;
 
     return (
