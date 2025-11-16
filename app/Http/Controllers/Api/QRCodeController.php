@@ -58,6 +58,7 @@ class QRCodeController extends Controller
     public function generateReturnFromProfessional(Request $request, $negotiationId)
     {
         $user = $request->user();
+        $user->load('professional'); // Carrega o relacionamento professional
         
         $negotiation = Negotiation::with(['professional', 'initiator'])
             ->where('professional_id', $user->professional->id) // Apenas o profissional pode gerar
@@ -170,6 +171,7 @@ class QRCodeController extends Controller
         }
 
         $user = $request->user();
+        $user->load('professional'); // Carrega o relacionamento professional
         
         $checkpoint = QRCodeCheckpoint::with(['negotiation', 'generatedBy'])
             ->where('qr_code', $request->qr_code)
