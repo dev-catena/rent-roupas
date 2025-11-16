@@ -42,6 +42,12 @@
       "expo-image-picker",
       "expo-asset",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Permitir que $(PRODUCT_NAME) acesse a câmera para escanear QR Codes."
+        }
+      ],
+      [
         "expo-media-library",
         {
           "photosPermission": "Permitir que $(PRODUCT_NAME) acesse suas fotos.",

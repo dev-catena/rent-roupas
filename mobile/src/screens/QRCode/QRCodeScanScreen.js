@@ -6,22 +6,21 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '../../config/api';
 
 export default function QRCodeScanScreen({ navigation }) {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
+    if (!permission) {
+      requestPermission();
+    }
   }, []);
 
-  async function handleBarCodeScanned({ type, data }) {
+  async function handleBarCodeScanned({ data }) {
     if (scanned || processing) return;
     
     setScanned(true);
@@ -82,7 +81,7 @@ export default function QRCodeScanScreen({ navigation }) {
     }
   }
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.container}>
         <Text style={styles.message}>Solicitando permissão da câmera...</Text>
@@ -90,13 +89,19 @@ export default function QRCodeScanScreen({ navigation }) {
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text style={styles.message}>Sem acesso à câmera</Text>
         <Text style={styles.submessage}>
-          Permita o acesso à câmera nas configurações do seu dispositivo
+          Permita o acesso à câmera para escanear QR Codes
         </Text>
+        <TouchableOpacity 
+          style={styles.permissionButton}
+          onPress={requestPermission}
+        >
+          <Text style={styles.permissionButtonText}>Permitir Acesso</Text>
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -109,9 +114,13 @@ export default function QRCodeScanScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <BarCodeScanner
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+      <CameraView
         style={StyleSheet.absoluteFillObject}
+        facing="back"
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
+        }}
       />
       
       <View style={styles.overlay}>
@@ -158,6 +167,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   message: {
     fontSize: 18,
@@ -170,6 +181,19 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     textAlign: 'center',
     paddingHorizontal: 32,
+    marginBottom: 24,
+  },
+  permissionButton: {
+    backgroundColor: '#6366f1',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  permissionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   overlay: {
     flex: 1,
@@ -256,8 +280,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   backButton: {
-    marginTop: 24,
-    backgroundColor: '#6366f1',
+    marginTop: 12,
+    backgroundColor: '#374151',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -268,4 +292,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
