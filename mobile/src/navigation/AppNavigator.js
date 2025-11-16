@@ -17,6 +17,7 @@ import RentalsScreen from '../screens/Rentals/RentalsScreen';
 import ChatsScreen from '../screens/Chat/ChatsScreen';
 import ChatDetailScreen from '../screens/Chat/ChatDetailScreen';
 import RegisterProfessionalScreen from '../screens/Professional/RegisterProfessionalScreen';
+import EditProfessionalScreen from '../screens/Professional/EditProfessionalScreen';
 import ProfessionalsListScreen from '../screens/Professional/ProfessionalsListScreen';
 import RatingScreen from '../screens/Rating/RatingScreen';
 import VirtualTryOnScreen from '../screens/VirtualTryOn/VirtualTryOnScreen';
@@ -132,6 +133,11 @@ function ProfileStack() {
         name="RegisterProfessional" 
         component={RegisterProfessionalScreen}
         options={{ title: 'Cadastro Profissional' }}
+      />
+      <Stack.Screen 
+        name="EditProfessional" 
+        component={EditProfessionalScreen}
+        options={{ title: 'Editar Dados Profissionais' }}
       />
       <Stack.Screen 
         name="ProfessionalsList" 

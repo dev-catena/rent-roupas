@@ -23,11 +23,14 @@ export default function ProfileScreen({ navigation }) {
     );
   }
 
+  // Verifica se o usuário é profissional
+  const isProfessional = user?.user_type === 'professional' || user?.professional;
+
   const menuItems = [
     {
       icon: '📏',
       title: 'Minhas Medidas',
-      subtitle: user.measurements ? 'Medidas cadastradas' : 'Cadastre suas medidas',
+      subtitle: user?.measurements ? 'Medidas cadastradas' : 'Cadastre suas medidas',
       onPress: () => navigation.navigate('Measurements'),
     },
     {
@@ -48,7 +51,13 @@ export default function ProfileScreen({ navigation }) {
       subtitle: 'Encontre costureiras e alfaiates',
       onPress: () => navigation.navigate('ProfessionalsList'),
     },
-    {
+    // Mostra "Editar" se já for profissional, "Cadastrar" se não for
+    isProfessional ? {
+      icon: '✂️',
+      title: 'Editar Dados Profissionais',
+      subtitle: 'Atualize suas informações profissionais',
+      onPress: () => navigation.navigate('EditProfessional'),
+    } : {
       icon: '🧵',
       title: 'Cadastrar como Profissional',
       subtitle: 'Ofereça serviços de costura',

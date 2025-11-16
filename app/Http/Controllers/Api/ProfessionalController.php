@@ -113,13 +113,13 @@ class ProfessionalController extends Controller
     public function updateProfile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'type' => 'sometimes|in:tailor,seamstress,designer,stylist,other',
-            'bio' => 'sometimes|string|min:50',
+            'type' => 'sometimes|in:seamstress,tailor,stylist,designer,other',
+            'bio' => 'sometimes|string',
             'specialties' => 'sometimes|array',
-            'years_experience' => 'sometimes|integer|min:0',
+            'years_of_experience' => 'sometimes|integer|min:0',
             'base_price' => 'sometimes|numeric|min:0',
             'express_fee' => 'sometimes|numeric|min:0',
-            'availability' => 'sometimes|array',
+            'availability' => 'sometimes|string',
             'accepts_express' => 'sometimes|boolean',
             'is_available' => 'sometimes|boolean',
             'workshop_address' => 'sometimes|string',
