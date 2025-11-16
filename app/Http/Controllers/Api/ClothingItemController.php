@@ -242,5 +242,29 @@ class ClothingItemController extends Controller
             'data' => $items
         ]);
     }
+
+    public function markAsAvailable(Request $request, $id)
+    {
+        $item = ClothingItem::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        if (!$item->in_use) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta peça não está em uso'
+            ], 400);
+        }
+
+        $item->update([
+            'in_use' => false,
+            'current_rental_id' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Peça marcada como disponível novamente',
+            'data' => $item
+        ]);
+    }
 }
 

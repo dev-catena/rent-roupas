@@ -30,6 +30,8 @@ class ClothingItem extends Model
         'shoe_size',
         'price_per_day',
         'is_available',
+        'in_use',
+        'current_rental_id',
         'available_from',
         'available_until',
         'views_count',
@@ -48,6 +50,7 @@ class ClothingItem extends Model
         'shoe_size' => 'decimal:1',
         'price_per_day' => 'decimal:2',
         'is_available' => 'boolean',
+        'in_use' => 'boolean',
         'available_from' => 'date',
         'available_until' => 'date',
         'views_count' => 'integer',
@@ -94,7 +97,8 @@ class ClothingItem extends Model
     // Scopes
     public function scopeAvailable($query)
     {
-        return $query->where('is_available', true);
+        return $query->where('is_available', true)
+                     ->where('in_use', false);
     }
 
     public function scopeByCategory($query, $category)

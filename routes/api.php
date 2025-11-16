@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/clothing-items/{id}/photos', [ClothingItemController::class, 'uploadPhotos']);
     Route::delete('/clothing-items/photos/{photoId}', [ClothingItemController::class, 'deletePhoto']);
     Route::get('/my-items', [ClothingItemController::class, 'myItems']);
+    Route::put('/clothing-items/{id}/mark-available', [ClothingItemController::class, 'markAsAvailable']);
     
     // Matching/Recomendações
     Route::post('/matching/search', [MatchingController::class, 'search']);

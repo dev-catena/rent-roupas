@@ -95,6 +95,14 @@ class Negotiation extends Model
             'responded_at' => now(),
             'closed_at' => now(),
         ]);
+
+        // Marca a peça como em uso
+        if ($this->clothingItem) {
+            $this->clothingItem->update([
+                'in_use' => true,
+                'current_rental_id' => $this->rental_id,
+            ]);
+        }
     }
 
     public function reject()
