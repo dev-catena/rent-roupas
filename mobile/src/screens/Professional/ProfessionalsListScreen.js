@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import api from '../../config/api';
 import { useAuth } from '../../contexts/AuthContext';
