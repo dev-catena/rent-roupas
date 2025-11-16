@@ -216,12 +216,45 @@ export default function ChatDetailScreen({ route, navigation }) {
       </ScrollView>
 
       {/* Profissional selecionado */}
-      {negotiation?.professional && (
-        <View style={styles.professionalBanner}>
-          <Text style={styles.professionalText}>
-            ✂️ Profissional: {negotiation.professional.user.name}
-          </Text>
-          <Text style={styles.professionalPrice}>R$ {negotiation.professional.base_price}</Text>
+      {negotiation?.professional && isActive && (
+        <View style={styles.professionalSection}>
+          <View style={styles.professionalBanner}>
+            <View style={styles.professionalInfo}>
+              <Text style={styles.professionalText}>
+                ✂️ Profissional: {negotiation.professional.user.name}
+              </Text>
+              <Text style={styles.professionalPrice}>R$ {negotiation.professional.base_price}</Text>
+            </View>
+          </View>
+          
+          {!isRecipient && (
+            <View style={styles.professionalActions}>
+              <TouchableOpacity 
+                style={styles.changeProfessionalButton} 
+                onPress={handleRequestAdjustment}
+              >
+                <Text style={styles.changeProfessionalButtonText}>🔄 Trocar Profissional</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.confirmProfessionalButton} 
+                onPress={() => Alert.alert(
+                  'Confirmar Profissional',
+                  `Deseja confirmar ${negotiation.professional.user.name} para fazer os ajustes?\n\nVocê pode enviar uma mensagem para combinar os detalhes.`,
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { 
+                      text: 'Confirmar',
+                      onPress: () => {
+                        Alert.alert('✅ Profissional Confirmado!', 'Agora você pode conversar com o profissional para combinar os ajustes.');
+                      }
+                    }
+                  ]
+                )}
+              >
+                <Text style={styles.confirmProfessionalButtonText}>✅ Confirmar Profissional</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
 
@@ -337,14 +370,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  professionalBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  professionalSection: {
     backgroundColor: '#fef3c7',
+    borderTopWidth: 1,
+    borderTopColor: '#fde68a',
+  },
+  professionalBanner: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#fde68a',
+  },
+  professionalInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   professionalText: {
     fontSize: 14,
@@ -355,6 +394,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#16a34a',
+  },
+  professionalActions: {
+    flexDirection: 'row',
+    padding: 12,
+    gap: 8,
+  },
+  changeProfessionalButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fbbf24',
+    alignItems: 'center',
+  },
+  changeProfessionalButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#92400e',
+  },
+  confirmProfessionalButton: {
+    flex: 1,
+    backgroundColor: '#16a34a',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmProfessionalButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
   },
   actionsBar: {
     flexDirection: 'row',
