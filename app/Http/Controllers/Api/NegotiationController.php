@@ -51,6 +51,7 @@ class NegotiationController extends Controller
             'initiator',
             'recipient',
             'rental',
+            'professional.user',
             'messages.sender'
         ])
         ->where(function($query) use ($user) {
@@ -243,6 +244,42 @@ class NegotiationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Negociação rejeitada'
+        ]);
+    }
+
+    public function addProfessional(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'professional_id' => 'required|exists:professionals,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+        
+        $negotiation = Negotiation::where(function($query) use ($user) {
+            $query->where('initiator_id', $user->id)
+                  ->orWhere('recipient_id', $user->id);
+        })
+        ->findOrFail($id);
+
+        // Atualiza a negociação com o profissional
+        $negotiation->update([
+            'professional_id' => $request->professional_id
+        ]);
+
+        // Recarrega com o relacionamento
+        $negotiation->load('professional.user');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profissional adicionado à negociação',
+            'data' => $negotiation
         ]);
     }
 }

@@ -15,6 +15,7 @@ class Negotiation extends Model
         'clothing_item_id',
         'initiator_id',
         'recipient_id',
+        'professional_id',
         'type',
         'status',
         'proposed_price',
@@ -51,6 +52,11 @@ class Negotiation extends Model
     public function recipient()
     {
         return $this->belongsTo(User::class, 'recipient_id');
+    }
+
+    public function professional()
+    {
+        return $this->belongsTo(Professional::class);
     }
 
     public function messages()

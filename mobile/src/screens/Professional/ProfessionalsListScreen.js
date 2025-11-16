@@ -118,13 +118,33 @@ export default function ProfessionalsListScreen({ route, navigation }) {
     return types[type] || type;
   }
 
-  function handleSelectProfessional(professional) {
+  async function handleSelectProfessional(professional) {
     if (negotiationId) {
-      // Se veio de uma negociação, atualiza a negociação com o profissional
-      navigation.navigate('ChatDetail', { 
-        negotiationId,
-        selectedProfessional: professional,
-      });
+      // Se veio de uma negociação, adiciona o profissional à negociação
+      try {
+        const response = await api.put(`/negotiations/${negotiationId}/professional`, {
+          professional_id: professional.id
+        });
+        
+        if (response.data.success) {
+          Alert.alert(
+            'Profissional Selecionado!',
+            `${professional.user.name} foi adicionado(a) à negociação.`,
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // Navega de volta para o chat, recarregando os dados
+                  navigation.navigate('ChatDetail', { negotiationId });
+                }
+              }
+            ]
+          );
+        }
+      } catch (error) {
+        console.error('Erro ao adicionar profissional:', error);
+        Alert.alert('Erro', 'Não foi possível adicionar o profissional à negociação');
+      }
     } else {
       // Senão, apenas mostra os detalhes
       navigation.navigate('ProfessionalDetail', { professionalId: professional.id });

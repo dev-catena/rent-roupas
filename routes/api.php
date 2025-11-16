@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/negotiations/{id}/messages', [NegotiationController::class, 'sendMessage']);
     Route::put('/negotiations/{id}/accept', [NegotiationController::class, 'accept']);
     Route::put('/negotiations/{id}/reject', [NegotiationController::class, 'reject']);
+    Route::put('/negotiations/{id}/professional', [NegotiationController::class, 'addProfessional']);
     
     // Virtual Try-On
     Route::post('/virtual-try-on', [VirtualTryOnController::class, 'tryOn']);

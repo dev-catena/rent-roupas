@@ -17,19 +17,18 @@ import api from '../../config/api';
 import { format } from 'date-fns';
 
 export default function ChatDetailScreen({ route, navigation }) {
-  const { negotiationId, selectedProfessional } = route.params || {};
+  const { negotiationId } = route.params || {};
   const { user } = useAuth();
   const [negotiation, setNegotiation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [professional, setProfessional] = useState(selectedProfessional);
   const flatListRef = useRef(null);
 
   useEffect(() => {
     loadNegotiation();
-  }, []);
+  }, [negotiationId]);
 
   async function loadNegotiation() {
     try {
@@ -217,19 +216,19 @@ export default function ChatDetailScreen({ route, navigation }) {
       </ScrollView>
 
       {/* Profissional selecionado */}
-      {professional && (
+      {negotiation?.professional && (
         <View style={styles.professionalBanner}>
           <Text style={styles.professionalText}>
-            ✂️ Profissional: {professional.user.name}
+            ✂️ Profissional: {negotiation.professional.user.name}
           </Text>
-          <Text style={styles.professionalPrice}>R$ {professional.base_price}</Text>
+          <Text style={styles.professionalPrice}>R$ {negotiation.professional.base_price}</Text>
         </View>
       )}
 
       {/* Ações da negociação */}
       {isActive && (
         <View style={styles.actionsBar}>
-          {!isRecipient && !professional && (
+          {!isRecipient && !negotiation?.professional && (
             <TouchableOpacity style={styles.actionButton} onPress={handleRequestAdjustment}>
               <Text style={styles.actionButtonText}>✂️ Solicitar Ajuste</Text>
             </TouchableOpacity>
