@@ -36,23 +36,72 @@ export default function ChatDetailScreen({ route, navigation }) {
     }, [negotiationId])
   );
 
-  // Polling automático a cada 10 segundos
+  // Long-polling para atualizações em tempo real
   useEffect(() => {
     loadNegotiation();
     loadCheckpoints();
 
-    const interval = setInterval(() => {
-      loadCheckpoints(); // Recarrega apenas checkpoints (mais leve)
-    }, 10000); // 10 segundos
+    let isActive = true;
+    let lastCheckpointId = 0;
 
-    return () => clearInterval(interval);
+    async function startLongPolling() {
+      while (isActive) {
+        try {
+          const response = await api.get(
+            `/negotiations/${negotiationId}/updates/poll?last_checkpoint_id=${lastCheckpointId}`,
+            { timeout: 30000 } // 30 segundos timeout
+          );
+
+          if (response.data.success && response.data.has_updates) {
+            console.log('📡 Atualização em tempo real recebida!');
+            
+            // Atualiza checkpoints
+            if (response.data.checkpoints && response.data.checkpoints.length > 0) {
+              setCheckpoints(prev => {
+                const newCheckpoints = response.data.checkpoints;
+                lastCheckpointId = Math.max(...newCheckpoints.map(c => c.id));
+                
+                // Merge sem duplicatas
+                const existingIds = prev.map(c => c.id);
+                const filtered = newCheckpoints.filter(c => !existingIds.includes(c.id));
+                return [...prev, ...filtered];
+              });
+            }
+            
+            // Atualiza negociação
+            if (response.data.negotiation) {
+              setNegotiation(response.data.negotiation);
+            }
+          }
+        } catch (error) {
+          if (error.code !== 'ECONNABORTED') {
+            console.error('Erro no long-polling:', error);
+          }
+          // Aguarda 2 segundos antes de tentar novamente em caso de erro
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+
+    startLongPolling();
+
+    return () => {
+      isActive = false;
+    };
   }, [negotiationId]);
 
   async function loadCheckpoints() {
     try {
       const response = await api.get(`/negotiations/${negotiationId}/checkpoints`);
       if (response.data.success) {
-        setCheckpoints(response.data.data);
+        const checkpointsData = response.data.data;
+        setCheckpoints(checkpointsData);
+        
+        // Atualiza o último ID para long-polling
+        if (checkpointsData.length > 0) {
+          const maxId = Math.max(...checkpointsData.map(c => c.id));
+          // Nota: lastCheckpointId é local no useEffect, não precisa setState aqui
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar checkpoints:', error);

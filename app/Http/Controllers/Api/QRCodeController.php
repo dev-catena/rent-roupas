@@ -240,6 +240,9 @@ class QRCodeController extends Controller
 
         // Marca como escaneado
         $checkpoint->markAsScanned($user->id, $request->notes);
+        
+        // Dispara evento de broadcast
+        event(new \App\Events\CheckpointScanned($checkpoint->fresh()));
 
         return response()->json([
             'success' => true,

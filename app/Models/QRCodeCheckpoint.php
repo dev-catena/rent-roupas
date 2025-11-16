@@ -63,6 +63,9 @@ class QRCodeCheckpoint extends Model
             'scanned_at' => now(),
             'notes' => $notes,
         ]);
+        
+        // Marca que houve atualização para notificar outros usuários
+        \Cache::put("negotiation_updated_{$this->negotiation_id}", time(), 60);
     }
 
     // Scopes

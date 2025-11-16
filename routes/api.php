@@ -76,6 +76,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/qrcode/scan', [QRCodeController::class, 'scanQRCode']);
     Route::get('/negotiations/{id}/checkpoints', [QRCodeController::class, 'getCheckpoints']);
     
+    // Real-time updates
+    Route::get('/negotiations/{id}/updates/poll', [\App\Http\Controllers\Api\NegotiationUpdatesController::class, 'poll']);
+    Route::get('/negotiations/{id}/updates/check', [\App\Http\Controllers\Api\NegotiationUpdatesController::class, 'checkUpdates']);
+    
     // Virtual Try-On
     Route::post('/virtual-try-on', [VirtualTryOnController::class, 'tryOn']);
     Route::get('/virtual-try-on/status/{predictionId}', [VirtualTryOnController::class, 'checkStatus']);
