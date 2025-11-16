@@ -156,7 +156,7 @@ export default function ChatDetailScreen({ route, navigation }) {
                deliveryCheckpoint?.status === 'scanned' ? '✅ Recebido' :
                'Aguardando...'}
             </Text>
-            {isInitiator && (
+            {isInitiator && deliveryCheckpoint?.status !== 'scanned' && (
               <TouchableOpacity 
                 style={styles.trackingButton}
                 onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'delivery_to_professional' })}
@@ -192,7 +192,7 @@ export default function ChatDetailScreen({ route, navigation }) {
                  returnCheckpoint?.status === 'scanned' ? '✅ Recebido de volta' :
                  'Aguardando ajustes...'}
               </Text>
-              {isProfessional && (
+              {isProfessional && returnCheckpoint?.status !== 'scanned' && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
                   onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_from_professional' })}
@@ -229,7 +229,7 @@ export default function ChatDetailScreen({ route, navigation }) {
                  returnOwnerCheckpoint?.status === 'scanned' ? '✅ Ciclo Completo!' :
                  'Aguardando...'}
               </Text>
-              {isInitiator && (
+              {isInitiator && returnOwnerCheckpoint?.status !== 'scanned' && (
                 <TouchableOpacity 
                   style={styles.trackingButton}
                   onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_to_owner' })}
