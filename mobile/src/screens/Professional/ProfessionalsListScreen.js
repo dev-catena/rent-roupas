@@ -149,7 +149,7 @@ export default function ProfessionalsListScreen({ route, navigation }) {
             <View style={styles.ratingContainer}>
               <Text style={styles.stars}>{renderStars(item.rating)}</Text>
               <Text style={styles.ratingText}>
-                {item.rating ? item.rating.toFixed(1) : 'Novo'} ({item.reviews_count || 0} avaliações)
+                {item.rating && typeof item.rating === 'number' ? item.rating.toFixed(1) : 'Novo'} ({item.reviews_count || 0} avaliações)
               </Text>
             </View>
           </View>
