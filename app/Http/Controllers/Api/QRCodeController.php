@@ -198,7 +198,16 @@ class QRCodeController extends Controller
         switch ($checkpoint->type) {
             case 'delivery_to_professional':
                 // Profissional da negociação pode escanear
-                $canScan = $negotiation->professional_id === $user->professional?->id;
+                \Log::info('Verificando permissão delivery_to_professional', [
+                    'negotiation_professional_id' => $negotiation->professional_id,
+                    'user_professional_id' => $user->professional?->id,
+                    'user_id' => $user->id,
+                    'has_professional' => $user->professional !== null
+                ]);
+                
+                if ($user->professional && $negotiation->professional_id === $user->professional->id) {
+                    $canScan = true;
+                }
                 break;
             
             case 'return_from_professional':
@@ -215,7 +224,15 @@ class QRCodeController extends Controller
         if (!$canScan) {
             return response()->json([
                 'success' => false,
-                'message' => 'Você não tem permissão para escanear este QR Code'
+                'message' => 'Você não tem permissão para escanear este QR Code',
+                'debug' => [
+                    'checkpoint_type' => $checkpoint->type,
+                    'user_id' => $user->id,
+                    'user_professional_id' => $user->professional?->id,
+                    'negotiation_professional_id' => $negotiation->professional_id,
+                    'negotiation_initiator_id' => $negotiation->initiator_id,
+                    'negotiation_recipient_id' => $negotiation->recipient_id
+                ]
             ], 403);
         }
 
