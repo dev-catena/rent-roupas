@@ -24,11 +24,24 @@ export default function ChatDetailScreen({ route, navigation }) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [checkpoints, setCheckpoints] = useState([]);
   const flatListRef = useRef(null);
 
   useEffect(() => {
     loadNegotiation();
+    loadCheckpoints();
   }, [negotiationId]);
+
+  async function loadCheckpoints() {
+    try {
+      const response = await api.get(`/negotiations/${negotiationId}/checkpoints`);
+      if (response.data.success) {
+        setCheckpoints(response.data.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar checkpoints:', error);
+    }
+  }
 
   async function loadNegotiation() {
     try {
@@ -98,8 +111,9 @@ export default function ChatDetailScreen({ route, navigation }) {
                     { text: 'Mais Tarde' }
                   ]
                 );
-                // Recarrega a negociação
+                // Recarrega a negociação e checkpoints
                 loadNegotiation();
+                loadCheckpoints();
               }
             } catch (error) {
               console.error('Erro ao confirmar profissional:', error);
@@ -108,6 +122,129 @@ export default function ChatDetailScreen({ route, navigation }) {
           }
         }
       ]
+    );
+  }
+
+  function getCheckpoint(type) {
+    return checkpoints.find(cp => cp.type === type);
+  }
+
+  function renderTracking() {
+    if (!negotiation?.professional_confirmed) {
+      return null; // Não mostra tracking antes de confirmar profissional
+    }
+
+    const deliveryCheckpoint = getCheckpoint('delivery_to_professional');
+    const returnCheckpoint = getCheckpoint('return_from_professional');
+    const returnOwnerCheckpoint = getCheckpoint('return_to_owner');
+
+    return (
+      <View style={styles.trackingSection}>
+        <Text style={styles.trackingSectionTitle}>📦 Rastreamento da Peça</Text>
+        
+        {/* Checkpoint 1: Entrega ao Profissional */}
+        <View style={styles.trackingStep}>
+          <View style={[styles.trackingIcon, deliveryCheckpoint?.status === 'scanned' && styles.trackingIconComplete]}>
+            <Text style={styles.trackingIconText}>{deliveryCheckpoint?.status === 'scanned' ? '✓' : '1'}</Text>
+          </View>
+          <View style={styles.trackingContent}>
+            <Text style={styles.trackingTitle}>Entrega ao Profissional</Text>
+            <Text style={styles.trackingStatus}>
+              {!deliveryCheckpoint && isInitiator ? 'Gere o QR Code para entregar' : 
+               deliveryCheckpoint?.status === 'pending' && isInitiator ? 'QR Code gerado - Mostre ao profissional' :
+               deliveryCheckpoint?.status === 'pending' && isProfessional ? 'Aguardando recebimento' :
+               deliveryCheckpoint?.status === 'scanned' ? '✅ Recebido' :
+               'Aguardando...'}
+            </Text>
+            {!deliveryCheckpoint && isInitiator && (
+              <TouchableOpacity 
+                style={styles.trackingButton}
+                onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'delivery_to_professional' })}
+              >
+                <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+              </TouchableOpacity>
+            )}
+            {deliveryCheckpoint?.status === 'pending' && isProfessional && (
+              <TouchableOpacity 
+                style={styles.trackingButton}
+                onPress={() => navigation.navigate('QRCodeScan')}
+              >
+                <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Checkpoint 2: Devolução do Profissional */}
+        {deliveryCheckpoint?.status === 'scanned' && (
+          <View style={styles.trackingStep}>
+            <View style={[styles.trackingIcon, returnCheckpoint?.status === 'scanned' && styles.trackingIconComplete]}>
+              <Text style={styles.trackingIconText}>{returnCheckpoint?.status === 'scanned' ? '✓' : '2'}</Text>
+            </View>
+            <View style={styles.trackingContent}>
+              <Text style={styles.trackingTitle}>Devolução do Profissional</Text>
+              <Text style={styles.trackingStatus}>
+                {!returnCheckpoint && isProfessional ? 'Gere o QR Code após ajustes' :
+                 returnCheckpoint?.status === 'pending' && isProfessional ? 'QR Code gerado - Mostre ao locatário' :
+                 returnCheckpoint?.status === 'pending' && isInitiator ? 'Aguardando devolução' :
+                 returnCheckpoint?.status === 'scanned' ? '✅ Recebido de volta' :
+                 'Aguardando ajustes...'}
+              </Text>
+              {!returnCheckpoint && isProfessional && (
+                <TouchableOpacity 
+                  style={styles.trackingButton}
+                  onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_from_professional' })}
+                >
+                  <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+                </TouchableOpacity>
+              )}
+              {returnCheckpoint?.status === 'pending' && isInitiator && (
+                <TouchableOpacity 
+                  style={styles.trackingButton}
+                  onPress={() => navigation.navigate('QRCodeScan')}
+                >
+                  <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Checkpoint 3: Devolução ao Dono */}
+        {returnCheckpoint?.status === 'scanned' && (
+          <View style={styles.trackingStep}>
+            <View style={[styles.trackingIcon, returnOwnerCheckpoint?.status === 'scanned' && styles.trackingIconComplete]}>
+              <Text style={styles.trackingIconText}>{returnOwnerCheckpoint?.status === 'scanned' ? '✓' : '3'}</Text>
+            </View>
+            <View style={styles.trackingContent}>
+              <Text style={styles.trackingTitle}>Devolução ao Proprietário</Text>
+              <Text style={styles.trackingStatus}>
+                {!returnOwnerCheckpoint && isInitiator ? 'Gere o QR Code para devolver' :
+                 returnOwnerCheckpoint?.status === 'pending' && isInitiator ? 'QR Code gerado - Mostre ao proprietário' :
+                 returnOwnerCheckpoint?.status === 'pending' && isRecipient ? 'Aguardando recebimento' :
+                 returnOwnerCheckpoint?.status === 'scanned' ? '✅ Ciclo Completo!' :
+                 'Aguardando...'}
+              </Text>
+              {!returnOwnerCheckpoint && isInitiator && (
+                <TouchableOpacity 
+                  style={styles.trackingButton}
+                  onPress={() => navigation.navigate('QRCodeGenerate', { negotiationId, type: 'return_to_owner' })}
+                >
+                  <Text style={styles.trackingButtonText}>Gerar QR Code</Text>
+                </TouchableOpacity>
+              )}
+              {returnOwnerCheckpoint?.status === 'pending' && isRecipient && (
+                <TouchableOpacity 
+                  style={styles.trackingButton}
+                  onPress={() => navigation.navigate('QRCodeScan')}
+                >
+                  <Text style={styles.trackingButtonText}>Escanear QR Code</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+      </View>
     );
   }
 
@@ -268,6 +405,9 @@ export default function ChatDetailScreen({ route, navigation }) {
           </View>
         </View>
       </ScrollView>
+
+      {/* Rastreamento */}
+      {renderTracking()}
 
       {/* Profissional selecionado */}
       {negotiation?.professional && isActive && (
@@ -486,6 +626,65 @@ const styles = StyleSheet.create({
     color: '#92400e',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  trackingSection: {
+    backgroundColor: '#f0fdf4',
+    borderBottomWidth: 1,
+    borderBottomColor: '#d1fae5',
+    padding: 16,
+  },
+  trackingSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#16a34a',
+    marginBottom: 16,
+  },
+  trackingStep: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  trackingIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#d1d5db',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  trackingIconComplete: {
+    backgroundColor: '#16a34a',
+  },
+  trackingIconText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  trackingContent: {
+    flex: 1,
+  },
+  trackingTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  trackingStatus: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginBottom: 8,
+  },
+  trackingButton: {
+    backgroundColor: '#16a34a',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  trackingButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
   actionsBar: {
     flexDirection: 'row',
