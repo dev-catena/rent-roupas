@@ -80,13 +80,54 @@ export default function MyItemsScreen({ navigation }) {
     );
   }
 
+  async function handleMarkAvailable(itemId, itemTitle) {
+    Alert.alert(
+      'Confirmar Disponibilidade',
+      `A peça "${itemTitle}" foi devolvida?\n\nConfirme para marcá-la como disponível novamente para aluguel.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              const response = await api.put(`/clothing-items/${itemId}/mark-available`);
+              if (response.data.success) {
+                // Atualiza o item na lista
+                setItems(items.map(item => 
+                  item.id === itemId 
+                    ? { ...item, in_use: false, current_rental_id: null }
+                    : item
+                ));
+                Alert.alert('✅ Pronto!', 'Sua peça está disponível novamente para aluguel');
+              }
+            } catch (error) {
+              console.error('Erro ao marcar como disponível:', error);
+              Alert.alert('Erro', error.response?.data?.message || 'Não foi possível atualizar a peça');
+            }
+          },
+        },
+      ]
+    );
+  }
+
   function renderItem({ item }) {
+    const isInUse = item.in_use === true || item.in_use === 1;
+    
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, isInUse && styles.cardInUse]}>
+        {isInUse && (
+          <View style={styles.inUseBadge}>
+            <Text style={styles.inUseBadgeText}>🔒 Em Uso</Text>
+          </View>
+        )}
+        
         {item.primary_photo ? (
-          <Image source={{ uri: item.primary_photo.url }} style={styles.cardImage} />
+          <Image 
+            source={{ uri: item.primary_photo.url }} 
+            style={[styles.cardImage, isInUse && styles.cardImageInUse]} 
+          />
         ) : (
-          <View style={styles.cardImagePlaceholder}>
+          <View style={[styles.cardImagePlaceholder, isInUse && styles.cardImageInUse]}>
             <Text>Sem foto</Text>
           </View>
         )}
@@ -100,18 +141,33 @@ export default function MyItemsScreen({ navigation }) {
             <Text style={styles.cardStat}>📦 {item.rentals_count || 0}</Text>
           </View>
 
+          {isInUse && (
+            <TouchableOpacity
+              style={styles.availableButton}
+              onPress={() => handleMarkAvailable(item.id, item.title)}
+            >
+              <Text style={styles.availableButtonText}>✅ Confirmar Devolução</Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.cardActions}>
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => navigation.navigate('EditItem', { itemId: item.id })}
+              style={[styles.actionButton, isInUse && styles.actionButtonDisabled]}
+              onPress={() => !isInUse && navigation.navigate('EditItem', { itemId: item.id })}
+              disabled={isInUse}
             >
-              <Text style={styles.actionButtonText}>✏️ Editar</Text>
+              <Text style={[styles.actionButtonText, isInUse && styles.actionButtonTextDisabled]}>
+                ✏️ Editar
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.actionButton, styles.deleteButton]}
-              onPress={() => handleDelete(item.id)}
+              style={[styles.actionButton, styles.deleteButton, isInUse && styles.actionButtonDisabled]}
+              onPress={() => !isInUse && handleDelete(item.id)}
+              disabled={isInUse}
             >
-              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>🗑️ Excluir</Text>
+              <Text style={[styles.actionButtonText, styles.deleteButtonText, isInUse && styles.actionButtonTextDisabled]}>
+                🗑️ Excluir
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -242,11 +298,53 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontWeight: '600',
   },
+  actionButtonDisabled: {
+    backgroundColor: '#e5e7eb',
+    opacity: 0.5,
+  },
+  actionButtonTextDisabled: {
+    color: '#9ca3af',
+  },
   deleteButton: {
     backgroundColor: '#fee2e2',
   },
   deleteButtonText: {
     color: '#dc2626',
+  },
+  cardInUse: {
+    opacity: 0.7,
+    borderWidth: 2,
+    borderColor: '#fbbf24',
+  },
+  cardImageInUse: {
+    opacity: 0.6,
+  },
+  inUseBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#fbbf24',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  inUseBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#78350f',
+  },
+  availableButton: {
+    backgroundColor: '#10b981',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  availableButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
   },
   emptyContainer: {
     padding: 40,
