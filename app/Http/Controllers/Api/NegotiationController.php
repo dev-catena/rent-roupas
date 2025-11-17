@@ -55,13 +55,17 @@ class NegotiationController extends Controller
     {
         $user = request()->user();
         
+        $user->load('professional');
+        
         $negotiation = Negotiation::with([
             'clothingItem.photos',
             'initiator',
             'recipient',
             'rental',
             'professional.user',
-            'messages.sender'
+            'messages' => function($query) {
+                $query->orderBy('created_at', 'asc')->with('sender');
+            }
         ])
         ->where(function($query) use ($user) {
             $query->where('initiator_id', $user->id)

@@ -73,7 +73,14 @@ export default function ChatDetailScreen({ route, navigation }) {
       const response = await api.get(`/negotiations/${negotiationId}`);
       if (response.data.success) {
         setNegotiation(response.data.data);
-        setMessages(response.data.data.messages.reverse());
+        // Mensagens já vêm ordenadas do backend (mais antigas primeiro)
+        // Não precisa fazer reverse - FlatList mostra do topo para baixo
+        setMessages(response.data.data.messages || []);
+        
+        // Scroll para o final (mensagens mais recentes) após carregar
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 100);
       }
     } catch (error) {
       console.error('Erro ao carregar negociação:', error);
@@ -92,10 +99,12 @@ export default function ChatDetailScreen({ route, navigation }) {
       });
 
       if (response.data.success) {
+        // Adiciona nova mensagem ao final da lista
         setMessages([...messages, response.data.data]);
         setNewMessage('');
+        // Scroll para o final após enviar mensagem
         setTimeout(() => {
-          flatListRef.current?.scrollToEnd();
+          flatListRef.current?.scrollToEnd({ animated: true });
         }, 100);
       }
     } catch (error) {
@@ -524,7 +533,14 @@ export default function ChatDetailScreen({ route, navigation }) {
         renderItem={renderMessage}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.messagesContent}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        onContentSizeChange={() => {
+          // Scroll para o final quando novas mensagens são adicionadas
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }}
+        onLayout={() => {
+          // Scroll para o final quando o layout é renderizado
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }}
       />
 
       {/* Input de mensagem */}
