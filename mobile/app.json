@@ -2,14 +2,14 @@
   "expo": {
     "name": "Rent Roupa",
     "slug": "rent-roupa",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6366f1"
+      "backgroundColor": "#2C3D73"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,9 +21,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#6366f1"
+        "backgroundColor": "#2C3D73"
       },
       "package": "com.rentroupa.app",
+      "versionCode": 2,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -55,6 +56,11 @@
           "isAccessMediaLocationEnabled": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f119e235-dbc7-472c-b343-886471ae8884"
+      }
+    }
   }
 }
