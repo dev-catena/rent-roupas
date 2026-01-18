@@ -13,6 +13,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { downloadAsync, documentDirectory } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
+import SafeIcon from '../../components/SafeIcon';
 
 export default function VirtualTryOnScreen({ route, navigation }) {
   const { item } = route.params || {};
@@ -272,11 +274,11 @@ export default function VirtualTryOnScreen({ route, navigation }) {
         ) : (
           <View style={styles.photoButtons}>
             <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-              <Text style={styles.photoButtonIcon}>📷</Text>
+              <SafeIcon name="camera" size={28} color={colors.primary} style={styles.photoButtonIcon} />
               <Text style={styles.photoButtonText}>Tirar Foto</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoButton} onPress={selectUserPhoto}>
-              <Text style={styles.photoButtonIcon}>🖼️</Text>
+              <SafeIcon name="images" size={28} color={colors.primary} style={styles.photoButtonIcon} />
               <Text style={styles.photoButtonText}>Escolher da Galeria</Text>
             </TouchableOpacity>
           </View>
@@ -290,7 +292,7 @@ export default function VirtualTryOnScreen({ route, navigation }) {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.tryOnButtonText}>✨ Experimentar Virtualmente</Text>
           )}
@@ -299,7 +301,7 @@ export default function VirtualTryOnScreen({ route, navigation }) {
 
       {processing && !resultImage && (
         <View style={styles.processingContainer}>
-          <ActivityIndicator size="large" color="#6366f1" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.processingText}>Processando...</Text>
           <Text style={styles.processingSubtext}>
             Isso pode levar de 30 segundos a 2 minutos
@@ -338,29 +340,29 @@ export default function VirtualTryOnScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'colors.white',
   },
   header: {
-    backgroundColor: '#6366f1',
+    backgroundColor: 'colors.primary',
     padding: 20,
     paddingTop: 30,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: 'colors.white',
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#e0e7ff',
+    color: 'colors.accent',
   },
   itemInfo: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'colors.backgroundLight',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: 'colors.border',
   },
   itemImage: {
     width: 120,
@@ -371,7 +373,7 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    color: 'colors.text',
     textAlign: 'center',
   },
   section: {
@@ -380,12 +382,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    color: 'colors.text',
     marginBottom: 8,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: 'colors.gray',
     marginBottom: 16,
   },
   photoButtons: {
@@ -394,21 +396,20 @@ const styles = StyleSheet.create({
   },
   photoButton: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'colors.lightGray',
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#e5e7eb',
+    borderColor: 'colors.border',
   },
   photoButtonIcon: {
-    fontSize: 40,
     marginBottom: 8,
   },
   photoButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: 'colors.darkGray',
   },
   photoContainer: {
     alignItems: 'center',
@@ -420,7 +421,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   changePhotoButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'colors.lightGray',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -428,10 +429,10 @@ const styles = StyleSheet.create({
   changePhotoText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: 'colors.darkGray',
   },
   tryOnButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: 'colors.primary',
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
@@ -439,7 +440,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tryOnButtonText: {
-    color: '#fff',
+    color: 'colors.white',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -450,12 +451,12 @@ const styles = StyleSheet.create({
   processingText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#6366f1',
+    color: 'colors.primary',
     marginTop: 16,
   },
   processingSubtext: {
     fontSize: 14,
-    color: '#6b7280',
+    color: 'colors.gray',
     marginTop: 8,
     textAlign: 'center',
   },
@@ -485,18 +486,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
+    color: 'colors.white',
     fontSize: 16,
     fontWeight: '600',
   },
   tryAgainButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'colors.lightGray',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   tryAgainButtonText: {
-    color: '#374151',
+    color: 'colors.darkGray',
     fontSize: 16,
     fontWeight: '600',
   },

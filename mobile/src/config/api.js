@@ -2,9 +2,11 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure o endereço da sua API aqui
+// Domínio: api.vestme.cloud (produção com HTTPS)
+
 const API_URL = __DEV__ 
-  ? 'http://10.102.0.115:8000/api'  // IP WiFi para dispositivo físico
-  : 'https://api.rentroupa.com.br/api'; // Produção
+  ? 'https://api.vestme.cloud/api'  // Desenvolvimento
+  : 'https://api.vestme.cloud/api'; // Produção
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,7 +19,7 @@ const api = axios.create({
 // Interceptor para adicionar token às requisições
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('@rent_roupa:token');
+    const token = await AsyncStorage.getItem('@vestme:token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,8 +36,8 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token inválido ou expirado
-      await AsyncStorage.removeItem('@rent_roupa:token');
-      await AsyncStorage.removeItem('@rent_roupa:user');
+      await AsyncStorage.removeItem('@vestme:token');
+      await AsyncStorage.removeItem('@vestme:user');
     }
     return Promise.reject(error);
   }
@@ -43,4 +45,3 @@ api.interceptors.response.use(
 
 export default api;
 export { API_URL };
-

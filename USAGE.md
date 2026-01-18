@@ -1,6 +1,6 @@
-# 📖 Guia de Uso - Rent Roupa
+# 📖 Guia de Uso - Vestme
 
-Este guia explica como usar as principais funcionalidades da plataforma Rent Roupa.
+Este guia explica como usar as principais funcionalidades da plataforma Vestme.
 
 ## 👤 Cadastro e Login
 
@@ -316,9 +316,9 @@ Se encontrar comportamento inadequado:
 
 ### Contato
 
-- Email: suporte@rentroupa.com.br
+- Email: suporte@vestme.cloud
 - Chat no app: Perfil > Ajuda
-- FAQ: www.rentroupa.com.br/faq
+- FAQ: www.vestme.cloud/faq
 
 ---
 

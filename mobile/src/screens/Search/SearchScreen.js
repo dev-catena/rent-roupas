@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,74 +10,132 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
+import SafeIcon from '../../components/SafeIcon';
 
 export default function SearchScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
-    category: null,
+    clothing_category_id: null,
     gender: null,
   });
 
-  async function handleSearch() {
-    if (!searchQuery.trim()) return;
+  // Carregar categorias ao montar o componente
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
+  async function loadCategories() {
+    try {
+      const response = await api.get('/clothing-categories');
+      if (response.data.success) {
+        setCategories(response.data.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+      // Fallback: usar categorias hardcoded se o servidor não responder
+      setCategories(getFallbackCategories());
+      console.log('Usando categorias locais como fallback');
+    } finally {
+      setLoadingCategories(false);
+    }
+  }
+
+  // Categorias locais como fallback
+  function getFallbackCategories() {
+    return [
+      { id: 1, name: 'Vestido', slug: 'dress' },
+      { id: 2, name: 'Calça', slug: 'pants' },
+      { id: 3, name: 'Camisa', slug: 'shirt' },
+      { id: 4, name: 'Sapato', slug: 'shoes' },
+      { id: 5, name: 'Saia', slug: 'skirt' },
+      { id: 6, name: 'Blazer', slug: 'blazer' },
+      { id: 7, name: 'Terno', slug: 'suit' },
+      { id: 8, name: 'Acessório', slug: 'accessory' },
+    ];
+  }
+
+  async function handleSearch() {
     setLoading(true);
     try {
-      const response = await api.get('/clothing-items', {
-        params: {
-          search: searchQuery,
-          ...filters,
-        },
-      });
+      const params = {};
+      
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+      
+      if (filters.clothing_category_id) {
+        params.clothing_category_id = filters.clothing_category_id;
+      }
+      
+      if (filters.gender) {
+        params.gender = filters.gender;
+      }
+
+      const response = await api.get('/clothing-items', { params });
 
       if (response.data.success) {
-        setResults(response.data.data.data);
+        setResults(response.data.data.data || []);
       }
     } catch (error) {
       console.error('Erro na busca:', error);
+      setResults([]);
     } finally {
       setLoading(false);
     }
   }
 
+  // Buscar automaticamente quando o filtro mudar
+  useEffect(() => {
+    if (!loadingCategories) {
+      handleSearch();
+    }
+  }, [filters.clothing_category_id, filters.gender]);
+
   function renderCategoryFilter() {
-    const categories = [
-      { key: null, label: 'Todos' },
-      { key: 'dress', label: 'Vestidos' },
-      { key: 'suit', label: 'Ternos' },
-      { key: 'shoes', label: 'Sapatos' },
-      { key: 'jacket', label: 'Casacos' },
+    const allCategories = [
+      { id: null, name: 'Todos' },
+      ...categories,
     ];
 
     return (
       <View style={styles.filterContainer}>
         <Text style={styles.filterLabel}>Categoria:</Text>
-        <FlatList
-          horizontal
-          data={categories}
-          keyExtractor={(item) => item.key || 'all'}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.filterChip,
-                filters.category === item.key && styles.filterChipActive,
-              ]}
-              onPress={() => setFilters({ ...filters, category: item.key })}
-            >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  filters.category === item.key && styles.filterChipTextActive,
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          )}
-          showsHorizontalScrollIndicator={false}
-        />
+        {loadingCategories ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <FlatList
+            horizontal
+            data={allCategories}
+            keyExtractor={(item) => item.id?.toString() || 'all'}
+            renderItem={({ item }) => {
+              const isActive = filters.clothing_category_id === item.id;
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    isActive && styles.filterChipActive,
+                  ]}
+                  onPress={() => setFilters({ ...filters, clothing_category_id: item.id })}
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      isActive && styles.filterChipTextActive,
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+            showsHorizontalScrollIndicator={false}
+          />
+        )}
       </View>
     );
   }
@@ -99,7 +157,9 @@ export default function SearchScreen({ navigation }) {
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
           <Text style={styles.cardPrice}>R$ {item.price_per_day}/dia</Text>
-          <Text style={styles.cardCategory}>{item.category}</Text>
+          {item.category && (
+            <Text style={styles.cardCategory}>{item.category.name || item.category}</Text>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -117,7 +177,7 @@ export default function SearchScreen({ navigation }) {
           returnKeyType="search"
         />
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>🔍</Text>
+          <SafeIcon name="search" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -174,9 +234,6 @@ const styles = StyleSheet.create({
     width: 48,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  searchButtonText: {
-    fontSize: 20,
   },
   filterContainer: {
     padding: 16,

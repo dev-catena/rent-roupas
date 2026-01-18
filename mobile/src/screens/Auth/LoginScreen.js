@@ -11,7 +11,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 
 export default function LoginScreen({ navigation }) {
   const { signIn } = useAuth();
@@ -27,11 +28,27 @@ export default function LoginScreen({ navigation }) {
     }
 
     setLoading(true);
-    const result = await signIn(email, password);
-    setLoading(false);
+    try {
+      const result = await signIn(email, password);
+      setLoading(false);
 
-    if (!result.success) {
-      Alert.alert('Erro', result.message);
+      if (!result.success) {
+        // Mensagem mais detalhada
+        const title = 'Erro ao fazer login';
+        const message = result.details 
+          ? `${result.message}\n\n${result.details}`
+          : result.message || 'Credenciais inválidas';
+        
+        Alert.alert(title, message);
+      }
+      // Se success, o AuthContext já atualizou o estado e a navegação acontece automaticamente
+    } catch (error) {
+      setLoading(false);
+      console.error('Erro no handleLogin:', error);
+      Alert.alert(
+        'Erro', 
+        'Ocorreu um erro inesperado. Verifique os logs no console para mais detalhes.'
+      );
     }
   }
 
@@ -89,7 +106,7 @@ export default function LoginScreen({ navigation }) {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <Text style={styles.loginButtonText}>Entrar</Text>
             )}
@@ -112,7 +129,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   content: {
     flex: 1,
@@ -123,19 +140,19 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   backButton: {
-    color: '#6366f1',
+    color: colors.primary,
     fontSize: 16,
     marginBottom: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
   form: {
     flex: 1,
@@ -146,7 +163,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.darkGray,
     marginBottom: 8,
   },
   input: {
@@ -155,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -163,7 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 12,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   passwordInput: {
     flex: 1,
@@ -177,14 +194,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   loginButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
   },
   loginButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -193,11 +210,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerLinkText: {
-    color: '#6b7280',
+    color: colors.gray,
     fontSize: 14,
   },
   registerLinkBold: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
   },
 });

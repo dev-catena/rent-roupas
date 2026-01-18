@@ -13,7 +13,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 import api from '../../config/api';
 import { format } from 'date-fns';
 
@@ -392,7 +393,7 @@ export default function ChatDetailScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -560,7 +561,7 @@ export default function ChatDetailScreen({ route, navigation }) {
             disabled={sending || !newMessage.trim()}
           >
             {sending ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <Text style={styles.sendButtonText}>➤</Text>
             )}
@@ -574,7 +575,7 @@ export default function ChatDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   loadingContainer: {
     flex: 1,
@@ -584,11 +585,11 @@ const styles = StyleSheet.create({
   headerScroll: {
     maxHeight: 80,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   header: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 12,
     gap: 12,
   },
@@ -598,13 +599,13 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     fontSize: 11,
-    color: '#9ca3af',
+    color: colors.textLight,
     marginBottom: 4,
   },
   headerValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
   },
   statusBadge: {
     borderRadius: 8,
@@ -617,14 +618,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#d1fae5',
   },
   statusRejected: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.errorLight,
   },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
   },
   professionalSection: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: colors.warningLight,
     borderTopWidth: 1,
     borderTopColor: '#fde68a',
   },
@@ -641,7 +642,7 @@ const styles = StyleSheet.create({
   professionalText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#92400e',
+    color: colors.warning,
   },
   professionalPrice: {
     fontSize: 14,
@@ -655,7 +656,7 @@ const styles = StyleSheet.create({
   },
   changeProfessionalButton: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -665,7 +666,7 @@ const styles = StyleSheet.create({
   changeProfessionalButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#92400e',
+    color: colors.warning,
   },
   confirmProfessionalButton: {
     flex: 1,
@@ -677,15 +678,15 @@ const styles = StyleSheet.create({
   confirmProfessionalButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.white,
   },
   professionalNote: {
     padding: 12,
-    backgroundColor: '#fef3c7',
+    backgroundColor: colors.warningLight,
   },
   professionalNoteText: {
     fontSize: 13,
-    color: '#92400e',
+    color: colors.warning,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -720,7 +721,7 @@ const styles = StyleSheet.create({
   trackingIconText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
   },
   trackingContent: {
     flex: 1,
@@ -728,12 +729,12 @@ const styles = StyleSheet.create({
   trackingTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 4,
   },
   trackingStatus: {
     fontSize: 13,
-    color: '#6b7280',
+    color: colors.gray,
     marginBottom: 8,
   },
   trackingButton: {
@@ -744,7 +745,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   trackingButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -752,9 +753,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 12,
     gap: 8,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   actionButton: {
     flex: 1,
@@ -770,25 +771,25 @@ const styles = StyleSheet.create({
   },
   rejectButton: {
     flex: 1,
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.errorLight,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   rejectButtonText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 14,
     fontWeight: '600',
   },
   acceptButton: {
     flex: 2,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   acceptButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -810,11 +811,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   myMessageBubble: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     borderBottomRightRadius: 4,
   },
   otherMessageBubble: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderBottomLeftRadius: 4,
   },
   messageText: {
@@ -823,10 +824,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   myMessageText: {
-    color: '#fff',
+    color: colors.white,
   },
   otherMessageText: {
-    color: '#1f2937',
+    color: colors.text,
   },
   messageTime: {
     fontSize: 11,
@@ -835,19 +836,19 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
   },
   otherMessageTime: {
-    color: '#9ca3af',
+    color: colors.textLight,
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: colors.border,
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -859,7 +860,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -867,7 +868,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   sendButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 20,
   },
 });

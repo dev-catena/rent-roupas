@@ -10,14 +10,19 @@ import {
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
 
 export default function QRCodeGenerateScreen({ route, navigation }) {
-  const { negotiationId, type } = route.params;
-  const [loading, setLoading] = useState(true);
-  const [qrData, setQrData] = useState(null);
+  const { negotiationId, type, qrCode, title, subtitle, qrData: initialQrData } = route.params || {};
+  const [loading, setLoading] = useState(!qrCode && !initialQrData);
+  const [qrData, setQrData] = useState(initialQrData || (qrCode ? { qr_code: qrCode, status: 'pending' } : null));
 
   useEffect(() => {
-    generateQRCode();
+    if (!qrCode && negotiationId && type) {
+      generateQRCode();
+    } else if (qrCode) {
+      setLoading(false);
+    }
   }, []);
 
   async function generateQRCode() {
@@ -48,6 +53,7 @@ export default function QRCodeGenerateScreen({ route, navigation }) {
   }
 
   function getTitle() {
+    if (title) return title;
     switch (type) {
       case 'delivery_to_professional':
         return 'Entrega para Profissional';
@@ -55,12 +61,15 @@ export default function QRCodeGenerateScreen({ route, navigation }) {
         return 'Devolução do Profissional';
       case 'return_to_owner':
         return 'Devolução ao Proprietário';
+      case 'delivery_to_renter':
+        return 'QR Code para Recebimento';
       default:
         return 'QR Code';
     }
   }
 
   function getInstructions() {
+    if (subtitle) return subtitle;
     switch (type) {
       case 'delivery_to_professional':
         return 'Mostre este QR Code para o profissional quando entregar a peça para ajuste.';
@@ -68,6 +77,8 @@ export default function QRCodeGenerateScreen({ route, navigation }) {
         return 'Mostre este QR Code para a locatária quando devolver a peça ajustada.';
       case 'return_to_owner':
         return 'Mostre este QR Code para o proprietário quando devolver a peça alugada.';
+      case 'delivery_to_renter':
+        return 'Mostre este QR Code ao proprietário na hora de receber a roupa.';
       default:
         return '';
     }
@@ -76,7 +87,7 @@ export default function QRCodeGenerateScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Gerando QR Code...</Text>
       </View>
     );
@@ -98,8 +109,8 @@ export default function QRCodeGenerateScreen({ route, navigation }) {
           <QRCode
             value={qrData.qr_code}
             size={250}
-            color="#1f2937"
-            backgroundColor="#ffffff"
+            color={colors.text}
+            backgroundColor={colors.white}
           />
         </View>
         

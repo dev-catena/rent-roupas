@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';
+import SafeIcon from '../../components/SafeIcon';
 
 export default function ProfileScreen({ navigation }) {
   const { user, signOut } = useAuth();
@@ -28,52 +30,52 @@ export default function ProfileScreen({ navigation }) {
 
   const menuItems = [
     {
-      icon: '📏',
+      icon: 'resize',
       title: 'Minhas Medidas',
       subtitle: user?.measurements ? 'Medidas cadastradas' : 'Cadastre suas medidas',
       onPress: () => navigation.navigate('Measurements'),
     },
     {
-      icon: '📦',
+      icon: 'cube',
       title: 'Meus Aluguéis',
       subtitle: 'Aluguéis ativos e histórico',
       onPress: () => navigation.navigate('Rentals'),
     },
     {
-      icon: '💬',
+      icon: 'chatbubbles',
       title: 'Conversas',
       subtitle: 'Negociações e mensagens',
       onPress: () => navigation.navigate('Chats'),
     },
     {
-      icon: '✂️',
+      icon: 'construct',
       title: 'Profissionais',
       subtitle: 'Encontre costureiras e alfaiates',
       onPress: () => navigation.navigate('ProfessionalsList'),
     },
     // Mostra "Editar" se já for profissional, "Cadastrar" se não for
     isProfessional ? {
-      icon: '✂️',
+      icon: 'create',
       title: 'Editar Dados Profissionais',
       subtitle: 'Atualize suas informações profissionais',
       onPress: () => navigation.navigate('EditProfessional'),
     } : {
-      icon: '🧵',
+      icon: 'add-circle',
       title: 'Cadastrar como Profissional',
       subtitle: 'Ofereça serviços de costura',
       onPress: () => navigation.navigate('RegisterProfessional'),
     },
     {
-      icon: '⚙️',
+      icon: 'settings',
       title: 'Configurações',
       subtitle: 'Preferências do aplicativo',
       onPress: () => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento'),
     },
     {
-      icon: 'ℹ️',
+      icon: 'information-circle',
       title: 'Sobre',
       subtitle: 'Informações do app',
-      onPress: () => Alert.alert('Rent Roupa', 'Versão 1.0.0'),
+      onPress: () => Alert.alert('Vestme', 'Versão 1.0.0'),
     },
   ];
 
@@ -89,12 +91,34 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.email}>{user?.email || ''}</Text>
         
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            {user?.user_type === 'renter' ? '👤 Locatário' : 
-             user?.user_type === 'owner' ? '🏠 Proprietário' : 
-             user?.user_type === 'professional' ? '✂️ Profissional' : 
-             user?.user_type === 'both' ? '🔄 Ambos' : '👤 Usuário'}
-          </Text>
+          <View style={styles.badgeContent}>
+            {user?.user_type === 'renter' ? (
+              <>
+                <SafeIcon name="person" size={16} color={colors.white} />
+                <Text style={styles.badgeText}> Locatário</Text>
+              </>
+            ) : user?.user_type === 'owner' ? (
+              <>
+                <SafeIcon name="home" size={16} color={colors.white} />
+                <Text style={styles.badgeText}> Proprietário</Text>
+              </>
+            ) : user?.user_type === 'professional' ? (
+              <>
+                <SafeIcon name="construct" size={16} color={colors.white} />
+                <Text style={styles.badgeText}> Profissional</Text>
+              </>
+            ) : user?.user_type === 'both' ? (
+              <>
+                <SafeIcon name="swap-horizontal" size={16} color={colors.white} />
+                <Text style={styles.badgeText}> Ambos</Text>
+              </>
+            ) : (
+              <>
+                <SafeIcon name="person" size={16} color={colors.white} />
+                <Text style={styles.badgeText}> Usuário</Text>
+              </>
+            )}
+          </View>
         </View>
       </View>
 
@@ -106,13 +130,13 @@ export default function ProfileScreen({ navigation }) {
             onPress={item.onPress}
           >
             <View style={styles.menuIcon}>
-              <Text style={styles.menuIconText}>{item.icon}</Text>
+              <SafeIcon name={item.icon} size={24} color={colors.primary} />
             </View>
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>{item.title}</Text>
               <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
             </View>
-            <Text style={styles.menuArrow}>›</Text>
+            <SafeIcon name="chevron-forward" size={20} color={colors.textLight} />
           </TouchableOpacity>
         ))}
       </View>
@@ -129,18 +153,18 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   header: {
     alignItems: 'center',
     padding: 30,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -148,17 +172,17 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#6366f1',
+    color: colors.primary,
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
     marginBottom: 4,
   },
   email: {
     fontSize: 14,
-    color: '#e0e7ff',
+    color: colors.accent,
     marginBottom: 12,
   },
   badge: {
@@ -167,8 +191,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
+  badgeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   badgeText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -178,7 +206,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -187,13 +215,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-  },
-  menuIconText: {
-    fontSize: 20,
   },
   menuContent: {
     flex: 1,
@@ -201,19 +226,15 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 2,
   },
   menuSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
-  },
-  menuArrow: {
-    fontSize: 24,
-    color: '#9ca3af',
+    color: colors.gray,
   },
   logoutButton: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.errorLight,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -221,7 +242,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   logoutButtonText: {
-    color: '#dc2626',
+    color: colors.error,
     fontSize: 16,
     fontWeight: '600',
   },

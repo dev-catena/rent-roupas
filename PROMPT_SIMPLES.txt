@@ -1,0 +1,37 @@
+Crie um aplicativo React Native usando Expo com a seguinte arquitetura básica:
+
+**Estrutura de Pastas:**
+- src/config/          # Configurações (API)
+- src/constants/        # Constantes (cores)
+- src/contexts/         # Context API (AuthContext)
+- src/navigation/       # Navegação
+  - RootNavigator.js    # Decide entre AuthNavigator ou AppNavigator
+  - AuthNavigator.js    # Stack Navigator para autenticação
+  - AppNavigator.js     # Tab Navigator com múltiplos Stack Navigators
+- src/screens/          # Telas organizadas por funcionalidade
+  - Auth/              # WelcomeScreen, LoginScreen, RegisterScreen
+
+**Sistema de Navegação:**
+1. RootNavigator: Verifica autenticação e renderiza AuthNavigator (não autenticado) ou AppNavigator (autenticado)
+2. AuthNavigator: Stack Navigator com Welcome, Login, Register
+3. AppNavigator: Tab Navigator com pelo menos 3-4 abas, cada uma com seu próprio Stack Navigator
+
+**Gerenciamento de Estado:**
+- AuthContext usando Context API
+- AuthProvider envolvendo a aplicação no App.js
+- Estados: user, loading, signed
+- Funções: signIn, signUp, signOut
+- Persistência básica com AsyncStorage
+
+**Configuração:**
+- Cores centralizadas em constants/colors.js
+- API config em config/api.js
+- App.js: <AuthProvider><NavigationContainer><RootNavigator /></NavigationContainer></AuthProvider>
+
+**Dependências:**
+- @react-navigation/native, @react-navigation/stack, @react-navigation/bottom-tabs
+- @react-native-async-storage/async-storage
+- react-native-vector-icons (para ícones das abas)
+
+Crie apenas a estrutura básica e componentes placeholder, sem implementar funcionalidades específicas do domínio.
+

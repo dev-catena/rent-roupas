@@ -19,7 +19,16 @@ class MatchingService
 
         // Aplica filtros básicos
         if (isset($filters['category'])) {
-            $query->where('category', $filters['category']);
+            // Pode ser ID da categoria ou slug
+            if (is_numeric($filters['category'])) {
+                $query->where('clothing_category_id', $filters['category']);
+            } else {
+                // Se for slug, busca o ID da categoria
+                $category = \App\Models\ClothingCategory::where('slug', $filters['category'])->first();
+                if ($category) {
+                    $query->where('clothing_category_id', $category->id);
+                }
+            }
         }
 
         if (isset($filters['gender'])) {
@@ -50,32 +59,58 @@ class MatchingService
      */
     public function getRecommendations(User $user, int $limit = 20): Collection
     {
-        // Busca categorias que o usuário já alugou ou favoritou
-        $favoriteCategories = $user->favorites()->pluck('category')->unique();
-        $rentedCategories = $user->rentalsAsRenter()
-            ->with('clothingItem')
-            ->get()
-            ->pluck('clothingItem.category')
-            ->unique();
+        // Busca IDs de categorias que o usuário já alugou ou favoritou
+        $favoriteCategoryIds = collect();
+        try {
+            $favorites = $user->favorites()->with('category')->get();
+            $favoriteCategoryIds = $favorites->pluck('clothing_category_id')->filter()->unique();
+        } catch (\Exception $e) {
+            // Se não houver favoritos ou tabela não existir, continua
+        }
+            
+        $rentedCategoryIds = collect();
+        try {
+            $rentals = $user->rentalsAsRenter()
+                ->with(['clothingItem' => function($query) {
+                    $query->with('category');
+                }])
+                ->get();
+            $rentedCategoryIds = $rentals
+                ->pluck('clothingItem.clothing_category_id')
+                ->filter()
+                ->unique();
+        } catch (\Exception $e) {
+            // Se não houver aluguéis ou tabela não existir, continua
+        }
 
-        $preferredCategories = $favoriteCategories->merge($rentedCategories)->unique();
+        $preferredCategoryIds = $favoriteCategoryIds->merge($rentedCategoryIds)->unique();
 
-        $query = ClothingItem::with(['user', 'primaryPhoto', 'photos'])
+        $query = ClothingItem::with(['user', 'primaryPhoto', 'photos', 'category'])
             ->available()
             ->where('user_id', '!=', $user->id); // Não mostra próprias peças
 
         // Prioriza categorias de interesse
-        if ($preferredCategories->isNotEmpty()) {
-            $query->whereIn('category', $preferredCategories->toArray());
+        if ($preferredCategoryIds->isNotEmpty()) {
+            $query->whereIn('clothing_category_id', $preferredCategoryIds->toArray());
         }
 
-        // Busca peças bem avaliadas
+        // Busca peças bem avaliadas (ou sem avaliação ainda)
         $query->where(function($q) {
             $q->whereNull('rating')
               ->orWhere('rating', '>=', 4.0);
         });
 
         $items = $query->limit($limit * 3)->get(); // Busca mais para rankear
+
+        // Se não houver itens, retorna itens disponíveis sem filtro de categoria
+        if ($items->isEmpty()) {
+            $query = ClothingItem::with(['user', 'primaryPhoto', 'photos', 'category'])
+                ->available()
+                ->where('user_id', '!=', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->limit($limit);
+            $items = $query->get();
+        }
 
         return $this->rankByCompatibility($items, $user)->take($limit);
     }

@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
+import SafeIcon from '../../components/SafeIcon';
 
 export default function MyItemsScreen({ navigation }) {
   const [items, setItems] = useState([]);
@@ -98,7 +100,7 @@ export default function MyItemsScreen({ navigation }) {
                     ? { ...item, in_use: false, current_rental_id: null }
                     : item
                 ));
-                Alert.alert('✅ Pronto!', 'Sua peça está disponível novamente para aluguel');
+                Alert.alert('Pronto!', 'Sua peça está disponível novamente para aluguel');
               }
             } catch (error) {
               console.error('Erro ao marcar como disponível:', error);
@@ -117,7 +119,10 @@ export default function MyItemsScreen({ navigation }) {
       <View style={[styles.card, isInUse && styles.cardInUse]}>
         {isInUse && (
           <View style={styles.inUseBadge}>
-            <Text style={styles.inUseBadgeText}>🔒 Em Uso</Text>
+            <View style={styles.inUseBadgeContent}>
+              <SafeIcon name="lock-closed" size={14} color="#78350f" />
+              <Text style={styles.inUseBadgeText}> Em Uso</Text>
+            </View>
           </View>
         )}
         
@@ -137,8 +142,14 @@ export default function MyItemsScreen({ navigation }) {
           <Text style={styles.cardPrice}>R$ {item.price_per_day || '0'}/dia</Text>
           
           <View style={styles.cardStats}>
-            <Text style={styles.cardStat}>👁 {item.views_count || 0}</Text>
-            <Text style={styles.cardStat}>📦 {item.rentals_count || 0}</Text>
+            <View style={styles.cardStatContainer}>
+              <SafeIcon name="eye" size={16} color={colors.gray} />
+              <Text style={styles.cardStat}> {item.views_count || 0}</Text>
+            </View>
+            <View style={styles.cardStatContainer}>
+              <SafeIcon name="cube" size={16} color={colors.gray} />
+              <Text style={styles.cardStat}> {item.rentals_count || 0}</Text>
+            </View>
           </View>
 
           {isInUse && (
@@ -146,7 +157,10 @@ export default function MyItemsScreen({ navigation }) {
               style={styles.availableButton}
               onPress={() => handleMarkAvailable(item.id, item.title)}
             >
-              <Text style={styles.availableButtonText}>✅ Confirmar Devolução</Text>
+              <View style={styles.availableButtonContent}>
+                <SafeIcon name="checkmark-circle" size={18} color="#fff" />
+                <Text style={styles.availableButtonText}> Confirmar Devolução</Text>
+              </View>
             </TouchableOpacity>
           )}
 
@@ -156,18 +170,24 @@ export default function MyItemsScreen({ navigation }) {
               onPress={() => !isInUse && navigation.navigate('EditItem', { itemId: item.id })}
               disabled={isInUse}
             >
-              <Text style={[styles.actionButtonText, isInUse && styles.actionButtonTextDisabled]}>
-                ✏️ Editar
-              </Text>
+              <View style={styles.actionButtonContent}>
+                <SafeIcon name="create" size={16} color={isInUse ? '#9ca3af' : '#374151'} />
+                <Text style={[styles.actionButtonText, isInUse && styles.actionButtonTextDisabled]}>
+                  {' '}Editar
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton, isInUse && styles.actionButtonDisabled]}
               onPress={() => !isInUse && handleDelete(item.id)}
               disabled={isInUse}
             >
-              <Text style={[styles.actionButtonText, styles.deleteButtonText, isInUse && styles.actionButtonTextDisabled]}>
-                🗑️ Excluir
-              </Text>
+              <View style={styles.actionButtonContent}>
+                <SafeIcon name="trash" size={16} color={isInUse ? '#9ca3af' : '#dc2626'} />
+                <Text style={[styles.actionButtonText, styles.deleteButtonText, isInUse && styles.actionButtonTextDisabled]}>
+                  {' '}Excluir
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -211,7 +231,7 @@ export default function MyItemsScreen({ navigation }) {
           style={styles.fab}
           onPress={() => navigation.navigate('AddItem')}
         >
-          <Text style={styles.fabText}>+</Text>
+          <SafeIcon name="add" size={32} color="#fff" />
         </TouchableOpacity>
       )}
     </View>
@@ -278,6 +298,10 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 8,
   },
+  cardStatContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   cardStat: {
     fontSize: 14,
     color: '#6b7280',
@@ -291,6 +315,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f4f6',
     padding: 8,
     borderRadius: 8,
+    alignItems: 'center',
+  },
+  actionButtonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   actionButtonText: {
@@ -329,6 +357,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     zIndex: 10,
   },
+  inUseBadgeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   inUseBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
@@ -340,6 +372,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 8,
+  },
+  availableButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   availableButtonText: {
     fontSize: 13,
@@ -382,11 +418,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: '300',
   },
 });
 

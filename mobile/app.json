@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Rent Roupa",
-    "slug": "rent-roupa",
+    "name": "Vestme",
+    "slug": "vestme",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo-vestme-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo-vestme-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#2C3D73"
     },
@@ -16,14 +16,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rentroupa.app"
+      "bundleIdentifier": "com.vestme.app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo-vestme-adaptive.png",
         "backgroundColor": "#2C3D73"
       },
-      "package": "com.rentroupa.app",
+      "package": "com.vestme.app",
       "versionCode": 2,
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -39,6 +39,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-splash-screen",
       "expo-location",
       "expo-image-picker",
       "expo-asset",

@@ -11,6 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -40,6 +41,28 @@ export default function ItemDetailScreen({ route, navigation }) {
 
   async function handleRent() {
     navigation.navigate('RentRequest', { item });
+  }
+
+  async function handleBuy() {
+    try {
+      const response = await api.post('/sales', {
+        clothing_item_id: item.id,
+      });
+
+      if (response.data.success) {
+        Alert.alert(
+          'Sucesso',
+          'Solicitação de compra criada com sucesso! Aguarde a confirmação do vendedor.',
+          [
+            { text: 'OK', onPress: () => navigation.goBack() },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao criar compra:', error);
+      const message = error.response?.data?.message || 'Não foi possível criar a solicitação de compra';
+      Alert.alert('Erro', message);
+    }
   }
 
   if (loading) {
@@ -103,7 +126,12 @@ export default function ItemDetailScreen({ route, navigation }) {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.price}>R$ {item.price_per_day}/dia</Text>
+            <View>
+              <Text style={styles.price}>R$ {item.price_per_day}/dia</Text>
+              {item.is_for_sale && item.sale_price && (
+                <Text style={styles.salePrice}>R$ {item.sale_price} (venda)</Text>
+              )}
+            </View>
           </View>
           
           <View style={styles.badges}>
@@ -194,6 +222,12 @@ export default function ItemDetailScreen({ route, navigation }) {
         <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
           <Text style={styles.rentButtonText}>Alugar Peça</Text>
         </TouchableOpacity>
+
+        {item.is_for_sale && item.sale_price && (
+          <TouchableOpacity style={styles.buyButton} onPress={handleBuy}>
+            <Text style={styles.buyButtonText}>Comprar por R$ {item.sale_price}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={{ height: 20 }} />
@@ -266,6 +300,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#6366f1',
+  },
+  salePrice: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#16a34a',
+    marginTop: 4,
   },
   badges: {
     flexDirection: 'row',
@@ -385,6 +425,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rentButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  buyButton: {
+    backgroundColor: '#16a34a',
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  buyButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',

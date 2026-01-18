@@ -158,14 +158,44 @@ class QRCodeController extends Controller
     // Escaneia/valida um QR Code
     public function scanQRCode(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'qr_code' => 'required|string',
+        // Limpa e normaliza o QR code (remove espaços, quebras de linha, etc)
+        $qrCode = $request->input('qr_code');
+        if ($qrCode) {
+            $qrCode = trim($qrCode);
+            // Remove qualquer caractere de controle ou espaços extras
+            $qrCode = preg_replace('/\s+/', '', $qrCode);
+        }
+
+        // Log para debug
+        \Log::info('QR Code scan request', [
+            'qr_code_received' => $request->has('qr_code') ? (strlen($request->qr_code) > 0 ? 'present' : 'empty') : 'missing',
+            'qr_code_original_length' => $request->has('qr_code') ? strlen($request->qr_code) : 0,
+            'qr_code_cleaned_length' => $qrCode ? strlen($qrCode) : 0,
+            'qr_code_cleaned' => $qrCode ? substr($qrCode, 0, 50) . '...' : 'empty',
+        ]);
+
+        $validator = Validator::make([
+            'qr_code' => $qrCode,
+            'notes' => $request->input('notes'),
+        ], [
+            'qr_code' => 'required|string|min:1',
             'notes' => 'nullable|string|max:500',
+        ], [
+            'qr_code.required' => 'O código QR é obrigatório',
+            'qr_code.string' => 'O código QR deve ser uma string',
+            'qr_code.min' => 'O código QR não pode estar vazio',
         ]);
 
         if ($validator->fails()) {
+            \Log::warning('QR Code validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'qr_code_received' => $request->input('qr_code'),
+                'qr_code_cleaned' => $qrCode,
+            ]);
+            
             return response()->json([
                 'success' => false,
+                'message' => 'Dados inválidos',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -174,7 +204,7 @@ class QRCodeController extends Controller
         $user->load('professional'); // Carrega o relacionamento professional
         
         $checkpoint = QRCodeCheckpoint::with(['negotiation', 'generatedBy'])
-            ->where('qr_code', $request->qr_code)
+            ->where('qr_code', $qrCode)
             ->first();
 
         if (!$checkpoint) {
@@ -195,6 +225,14 @@ class QRCodeController extends Controller
 
         // Verifica se o usuário tem permissão para escanear
         $negotiation = $checkpoint->negotiation;
+        
+        if (!$negotiation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Negociação não encontrada para este QR Code'
+            ], 404);
+        }
+        
         $canScan = false;
 
         switch ($checkpoint->type) {
@@ -221,6 +259,11 @@ class QRCodeController extends Controller
                 // Dono da peça pode escanear
                 $canScan = $negotiation->recipient_id === $user->id;
                 break;
+            
+            case 'delivery_to_renter':
+                // Proprietário pode escanear para confirmar entrega ao locatário
+                $canScan = $negotiation->recipient_id === $user->id;
+                break;
         }
 
         if (!$canScan) {
@@ -240,6 +283,23 @@ class QRCodeController extends Controller
 
         // Marca como escaneado
         $checkpoint->markAsScanned($user->id, $request->notes);
+        
+        // Se for entrega ao locatário, marca o aluguel como ready (pronto para retirada)
+        if ($checkpoint->type === 'delivery_to_renter') {
+            try {
+                $rental = \App\Models\Rental::where('negotiation_id', $negotiation->id)->first();
+                if ($rental && $rental->status !== 'ready') {
+                    $rental->markAsReady();
+                }
+            } catch (\Exception $e) {
+                \Log::error('Erro ao atualizar status do aluguel após escanear QR Code', [
+                    'error' => $e->getMessage(),
+                    'negotiation_id' => $negotiation->id,
+                    'checkpoint_id' => $checkpoint->id
+                ]);
+                // Não falha o escaneamento se houver erro ao atualizar o aluguel
+            }
+        }
         
         // Dispara evento de broadcast
         event(new \App\Events\CheckpointScanned($checkpoint->fresh()));

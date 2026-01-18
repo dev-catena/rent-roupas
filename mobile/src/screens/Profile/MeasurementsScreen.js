@@ -9,7 +9,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 import api from '../../config/api';
 
 export default function MeasurementsScreen({ navigation }) {
@@ -275,7 +276,7 @@ export default function MeasurementsScreen({ navigation }) {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.white} />
         ) : (
           <Text style={styles.saveButtonText}>Salvar Medidas</Text>
         )}
@@ -289,22 +290,22 @@ export default function MeasurementsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   section: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     marginBottom: 16,
   },
   row: {
@@ -318,7 +319,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.darkGray,
     marginBottom: 8,
   },
   input: {
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   textArea: {
     height: 100,
@@ -346,26 +347,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   radioButtonSelected: {
-    borderColor: '#6366f1',
+    borderColor: colors.primary,
     backgroundColor: '#eef2ff',
   },
   radioText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
   },
   radioTextSelected: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
   },
   saveButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     margin: 20,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },

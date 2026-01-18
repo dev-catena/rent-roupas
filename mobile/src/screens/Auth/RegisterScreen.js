@@ -12,8 +12,10 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';
 import * as Location from 'expo-location';
+import SafeIcon from '../../components/SafeIcon';
 
 // Função para converter nome do estado para sigla
 function getStateAbbreviation(stateName) {
@@ -127,7 +129,7 @@ export default function RegisterScreen({ navigation }) {
         setState(getStateAbbreviation(geocode.region));
         setZipcode(geocode.postalCode || '');
         
-        Alert.alert('Sucesso!', 'Localização e endereço obtidos automaticamente! ✅');
+        Alert.alert('Sucesso!', 'Localização e endereço obtidos automaticamente!');
       } else {
         Alert.alert('Sucesso', 'Localização obtida! (Endereço não encontrado)');
       }
@@ -171,7 +173,7 @@ export default function RegisterScreen({ navigation }) {
         setState(getStateAbbreviation(geocode.region));
         setZipcode(geocode.postalCode || '');
         
-        Alert.alert('Sucesso!', 'Localização e endereço do ateliê obtidos automaticamente! ✅');
+        Alert.alert('Sucesso!', 'Localização e endereço do ateliê obtidos automaticamente!');
       } else {
         Alert.alert('Sucesso', 'Localização do ateliê obtida! (Endereço não encontrado)');
       }
@@ -236,22 +238,30 @@ export default function RegisterScreen({ navigation }) {
       userData.workshop_longitude = workshopLocation?.longitude;
     }
 
-    const result = await signUp(userData);
-    setLoading(false);
+    try {
+      const result = await signUp(userData);
+      setLoading(false);
 
-    console.log('Resultado do signUp:', result);
+      console.log('Resultado do signUp:', result);
 
-    if (!result.success) {
-      // Verifica se há erros de validação específicos
-      if (result.errors && Object.keys(result.errors).length > 0) {
-        const firstError = Object.values(result.errors)[0][0];
-        Alert.alert('Erro de validação', firstError);
+      if (!result.success) {
+        // Verifica se há erros de validação específicos
+        if (result.errors && Object.keys(result.errors).length > 0) {
+          const errorMessages = Object.entries(result.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n');
+          Alert.alert('Erro de validação', errorMessages);
+        } else {
+          Alert.alert('Erro', result.message || 'Não foi possível criar a conta');
+        }
       } else {
-        Alert.alert('Erro', result.message || 'Não foi possível criar a conta');
+        // Sucesso - o AuthContext já atualizou o estado, então a navegação acontece automaticamente
+        console.log('Cadastro bem-sucedido! Navegando para a tela principal...');
       }
-    } else {
-      console.log('Cadastro bem-sucedido! O app deveria navegar para a tela principal.');
-      Alert.alert('Sucesso!', 'Conta criada com sucesso!');
+    } catch (error) {
+      setLoading(false);
+      console.error('Erro ao criar conta:', error);
+      Alert.alert('Erro', 'Ocorreu um erro inesperado. Verifique sua conexão e tente novamente.');
     }
   }
 
@@ -309,7 +319,11 @@ export default function RegisterScreen({ navigation }) {
               style={styles.eyeButton}
               onPress={() => setShowPassword(!showPassword)}
             >
-              <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+              <SafeIcon 
+                name={showPassword ? 'eye' : 'eye-off'} 
+                size={20} 
+                color={colors.gray} 
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -329,7 +343,11 @@ export default function RegisterScreen({ navigation }) {
               style={styles.eyeButton}
               onPress={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
             >
-              <Text style={styles.eyeIcon}>{showPasswordConfirmation ? '👁️' : '👁️‍🗨️'}</Text>
+              <SafeIcon 
+                name={showPasswordConfirmation ? 'eye' : 'eye-off'} 
+                size={20} 
+                color={colors.gray} 
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -341,33 +359,61 @@ export default function RegisterScreen({ navigation }) {
               style={[styles.radioButton, userType === 'renter' && styles.radioButtonSelected]}
               onPress={() => setUserType('renter')}
             >
-              <Text style={[styles.radioText, userType === 'renter' && styles.radioTextSelected]}>
-                👤 Alugar roupas
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="person" 
+                  size={20} 
+                  color={userType === 'renter' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, userType === 'renter' && styles.radioTextSelected]}>
+                  {' '}Alugar roupas
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, userType === 'owner' && styles.radioButtonSelected]}
               onPress={() => setUserType('owner')}
             >
-              <Text style={[styles.radioText, userType === 'owner' && styles.radioTextSelected]}>
-                🏠 Emprestar roupas
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="home" 
+                  size={20} 
+                  color={userType === 'owner' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, userType === 'owner' && styles.radioTextSelected]}>
+                  {' '}Oferecer roupas
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, userType === 'both' && styles.radioButtonSelected]}
               onPress={() => setUserType('both')}
             >
-              <Text style={[styles.radioText, userType === 'both' && styles.radioTextSelected]}>
-                🔄 Ambos
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="swap-horizontal" 
+                  size={20} 
+                  color={userType === 'both' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, userType === 'both' && styles.radioTextSelected]}>
+                  {' '}Ambos
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, userType === 'professional' && styles.radioButtonSelected]}
               onPress={() => setUserType('professional')}
             >
-              <Text style={[styles.radioText, userType === 'professional' && styles.radioTextSelected]}>
-                ✂️ Como Profissional (Costureira/Alfaiate)
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="construct" 
+                  size={20} 
+                  color={userType === 'professional' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, userType === 'professional' && styles.radioTextSelected]}>
+                  {' '}Como Profissional (Costureira/Alfaiate)
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -396,11 +442,14 @@ export default function RegisterScreen({ navigation }) {
           disabled={loadingLocation}
         >
           {loadingLocation ? (
-            <ActivityIndicator color="#374151" />
+            <ActivityIndicator color={colors.darkGray} />
           ) : (
-            <Text style={styles.locationButtonText}>
-              📍 {location ? 'Localização obtida ✓' : 'Obter localização atual'}
-            </Text>
+            <View style={styles.locationButtonContent}>
+              <SafeIcon name="location" size={20} color={colors.darkGray} />
+              <Text style={styles.locationButtonText}>
+                {' '}{location ? 'Localização obtida ✓' : 'Obter localização atual'}
+              </Text>
+            </View>
           )}
         </TouchableOpacity>
 
@@ -471,7 +520,7 @@ export default function RegisterScreen({ navigation }) {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.white} />
               ) : (
                 <Text style={styles.registerButtonText}>Criar Conta</Text>
               )}
@@ -497,33 +546,61 @@ export default function RegisterScreen({ navigation }) {
               style={[styles.radioButton, professionalType === 'seamstress' && styles.radioButtonSelected]}
               onPress={() => setProfessionalType('seamstress')}
             >
-              <Text style={[styles.radioText, professionalType === 'seamstress' && styles.radioTextSelected]}>
-                🧵 Costureira
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="construct" 
+                  size={20} 
+                  color={professionalType === 'seamstress' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, professionalType === 'seamstress' && styles.radioTextSelected]}>
+                  {' '}Costureira
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, professionalType === 'tailor' && styles.radioButtonSelected]}
               onPress={() => setProfessionalType('tailor')}
             >
-              <Text style={[styles.radioText, professionalType === 'tailor' && styles.radioTextSelected]}>
-                ✂️ Alfaiate
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="construct" 
+                  size={20} 
+                  color={professionalType === 'tailor' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, professionalType === 'tailor' && styles.radioTextSelected]}>
+                  {' '}Alfaiate
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, professionalType === 'stylist' && styles.radioButtonSelected]}
               onPress={() => setProfessionalType('stylist')}
             >
-              <Text style={[styles.radioText, professionalType === 'stylist' && styles.radioTextSelected]}>
-                👗 Estilista
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="shirt" 
+                  size={20} 
+                  color={professionalType === 'stylist' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, professionalType === 'stylist' && styles.radioTextSelected]}>
+                  {' '}Estilista
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.radioButton, professionalType === 'designer' && styles.radioButtonSelected]}
               onPress={() => setProfessionalType('designer')}
             >
-              <Text style={[styles.radioText, professionalType === 'designer' && styles.radioTextSelected]}>
-                🎨 Designer
-              </Text>
+              <View style={styles.radioContent}>
+                <SafeIcon 
+                  name="color-palette" 
+                  size={20} 
+                  color={professionalType === 'designer' ? colors.primary : colors.gray} 
+                />
+                <Text style={[styles.radioText, professionalType === 'designer' && styles.radioTextSelected]}>
+                  {' '}Designer
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -578,11 +655,14 @@ export default function RegisterScreen({ navigation }) {
           disabled={loadingLocation}
         >
           {loadingLocation ? (
-            <ActivityIndicator color="#374151" />
+            <ActivityIndicator color={colors.darkGray} />
           ) : (
-            <Text style={styles.locationButtonText}>
-              📍 {workshopLocation ? 'Localização do ateliê obtida ✓' : 'Obter localização do ateliê'}
-            </Text>
+            <View style={styles.locationButtonContent}>
+              <SafeIcon name="location" size={20} color={colors.darkGray} />
+              <Text style={styles.locationButtonText}>
+                {' '}{workshopLocation ? 'Localização do ateliê obtida ✓' : 'Obter localização do ateliê'}
+              </Text>
+            </View>
           )}
         </TouchableOpacity>
 
@@ -622,7 +702,7 @@ export default function RegisterScreen({ navigation }) {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <Text style={styles.registerButtonText}>Criar Conta</Text>
             )}
@@ -671,7 +751,7 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   content: {
     flex: 1,
@@ -682,19 +762,19 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   backButtonLink: {
-    color: '#6366f1',
+    color: colors.primary,
     fontSize: 16,
     marginBottom: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
   form: {
     marginBottom: 20,
@@ -702,12 +782,12 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 8,
   },
   stepSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     marginBottom: 20,
   },
   inputContainer: {
@@ -716,7 +796,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.darkGray,
     marginBottom: 8,
   },
   input: {
@@ -725,7 +805,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -733,7 +813,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 12,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   passwordInput: {
     flex: 1,
@@ -742,9 +822,6 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     padding: 16,
-  },
-  eyeIcon: {
-    fontSize: 20,
   },
   textArea: {
     height: 100,
@@ -761,26 +838,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioButtonSelected: {
-    borderColor: '#6366f1',
+    borderColor: colors.primary,
     backgroundColor: '#eef2ff',
+  },
+  radioContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   radioText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
   radioTextSelected: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
   },
   locationButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 20,
   },
+  locationButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   locationButtonText: {
-    color: '#374151',
+    color: colors.darkGray,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -788,14 +873,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   nextButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
   },
   nextButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -806,25 +891,25 @@ const styles = StyleSheet.create({
   },
   backButton: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   backButtonText: {
-    color: '#374151',
+    color: colors.darkGray,
     fontSize: 16,
     fontWeight: '600',
   },
   registerButton: {
     flex: 2,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   registerButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -834,11 +919,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginLinkText: {
-    color: '#6b7280',
+    color: colors.gray,
     fontSize: 14,
   },
   loginLinkBold: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
   },
   daysContainer: {
@@ -855,16 +940,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dayButtonSelected: {
-    borderColor: '#6366f1',
+    borderColor: colors.primary,
     backgroundColor: '#eef2ff',
   },
   dayText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     fontWeight: '600',
   },
   dayTextSelected: {
-    color: '#6366f1',
+    color: colors.primary,
   },
 });
 

@@ -1,5 +1,5 @@
 {
-    "name": "rent-roupa/backend",
+    "name": "vestme/backend",
     "type": "project",
     "description": "Sistema de aluguel de roupas e sapatos para eventos",
     "keywords": ["laravel", "rent", "clothes", "events"],

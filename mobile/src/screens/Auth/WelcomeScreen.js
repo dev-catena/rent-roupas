@@ -7,14 +7,38 @@ import {
   Image,
   SafeAreaView,
 } from 'react-native';
+import Constants from 'expo-constants';
+import { colors } from '../../constants/colors';
+
+// Importar logos - com fallback caso não existam
+let logoFull;
+let logoIcon;
+try {
+  logoFull = require('../../../assets/logo-vestme-full.png');
+  logoIcon = require('../../../assets/logo-vestme-icon.png');
+} catch (e) {
+  // Logos ainda não adicionados - será usado fallback
+  logoFull = null;
+  logoIcon = null;
+}
 
 export default function WelcomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>👗</Text>
-          <Text style={styles.title}>Rent Roupa</Text>
+          {logoFull ? (
+            <Image 
+              source={logoFull} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          ) : (
+            <>
+              <Text style={styles.logoEmoji}>👗</Text>
+              <Text style={styles.title}>VestMe</Text>
+            </>
+          )}
           <Text style={styles.subtitle}>
             Alugue roupas para eventos e festas com facilidade
           </Text>
@@ -34,21 +58,11 @@ export default function WelcomeScreen({ navigation }) {
           >
             <Text style={styles.secondaryButtonText}>Já tenho uma conta</Text>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.features}>
-          <View style={styles.feature}>
-            <Text style={styles.featureIcon}>🎯</Text>
-            <Text style={styles.featureText}>Encontre a peça perfeita</Text>
-          </View>
-          <View style={styles.feature}>
-            <Text style={styles.featureIcon}>📍</Text>
-            <Text style={styles.featureText}>Pessoas próximas a você</Text>
-          </View>
-          <View style={styles.feature}>
-            <Text style={styles.featureIcon}>✂️</Text>
-            <Text style={styles.featureText}>Profissionais para ajustar</Text>
-          </View>
+          <Text style={styles.versionText}>
+            {Constants.expoConfig?.version || '1.0.0'}
+            {__DEV__ ? ' (dev)' : ''}
+          </Text>
         </View>
       </View>
     </SafeAreaView>
@@ -58,7 +72,7 @@ export default function WelcomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -68,20 +82,27 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginTop: 60,
+    marginBottom: 20,
   },
-  logo: {
+  logoImage: {
+    width: 280,
+    height: 100,
+    marginBottom: 20,
+    borderRadius: 12,
+  },
+  logoEmoji: {
     fontSize: 80,
     marginBottom: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
     textAlign: 'center',
     paddingHorizontal: 20,
   },
@@ -89,44 +110,31 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   primaryButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   secondaryButtonText: {
-    color: '#6366f1',
+    color: colors.primary,
     fontSize: 16,
     fontWeight: '600',
   },
-  features: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  feature: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  featureIcon: {
-    fontSize: 30,
-    marginBottom: 8,
-  },
-  featureText: {
+  versionText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: colors.textLight,
     textAlign: 'center',
+    marginTop: 20,
   },
 });
-

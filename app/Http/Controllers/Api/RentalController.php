@@ -217,10 +217,18 @@ class RentalController extends Controller
 
     public function myRentals(Request $request)
     {
-        $rentals = Rental::with(['clothingItem.primaryPhoto', 'owner'])
+        $rentals = Rental::with([
+            'clothingItem.primaryPhoto', 
+            'owner',
+            'negotiation' => function($query) {
+                $query->select('id', 'rental_id', 'status', 'clothing_item_id');
+            }
+        ])
             ->where('renter_id', $request->user()->id)
+            ->whereNotIn('status', ['completed', 'cancelled'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->limit(10)
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -230,14 +238,216 @@ class RentalController extends Controller
 
     public function myLendings(Request $request)
     {
-        $lendings = Rental::with(['clothingItem.primaryPhoto', 'renter'])
+        $lendings = Rental::with(['clothingItem.primaryPhoto', 'renter', 'negotiation'])
             ->where('owner_id', $request->user()->id)
+            ->whereNotIn('status', ['completed', 'cancelled', 'returned']) // Apenas em andamento
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get(); // Não paginado para o bloco da home
 
         return response()->json([
             'success' => true,
             'data' => $lendings
+        ]);
+    }
+
+    /**
+     * Processa o pagamento do aluguel (apenas locatário)
+     */
+    public function processPayment(Request $request, $id)
+    {
+        $rental = Rental::findOrFail($id);
+        $user = $request->user();
+
+        // Verifica se o usuário é o locatário
+        if ($rental->renter_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o locatário pode realizar o pagamento'
+            ], 403);
+        }
+
+        // Verifica se já foi pago
+        if ($rental->payment_status === 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este aluguel já foi pago'
+            ], 400);
+        }
+
+        // Valida dados do pagamento
+        $validator = Validator::make($request->all(), [
+            'payment_method' => 'required|string|in:credit_card,debit_card,pix,bank_transfer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // TODO: Integrar com gateway de pagamento real (Mercado Pago, Stripe, etc.)
+        // Por enquanto, apenas marca como pago
+        $rental->update([
+            'payment_status' => 'paid',
+            'payment_method' => $request->payment_method,
+            'paid_at' => now(),
+        ]);
+
+        // Gera QR Code para entrega (se não existir)
+        $negotiation = $rental->negotiation;
+        if ($negotiation) {
+            $existingCheckpoint = \App\Models\QRCodeCheckpoint::where('negotiation_id', $negotiation->id)
+                ->where('type', 'delivery_to_renter')
+                ->first();
+            
+            if (!$existingCheckpoint) {
+                \App\Models\QRCodeCheckpoint::create([
+                    'negotiation_id' => $negotiation->id,
+                    'type' => 'delivery_to_renter',
+                    'qr_code' => \Illuminate\Support\Str::uuid()->toString(),
+                    'generated_by_user_id' => $user->id,
+                    'status' => 'pending',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pagamento processado com sucesso. O proprietário será notificado.',
+            'data' => $rental->fresh()->load(['clothingItem', 'owner', 'renter', 'negotiation'])
+        ]);
+    }
+
+    /**
+     * Confirma que o locatário recebeu a roupa (apenas locatário)
+     * Isso libera o pagamento para o proprietário
+     */
+    public function confirmPickup(Request $request, $id)
+    {
+        $rental = Rental::findOrFail($id);
+        $user = $request->user();
+
+        // Verifica se o usuário é o locatário
+        if ($rental->renter_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o locatário pode confirmar o recebimento'
+            ], 403);
+        }
+
+        // Verifica se o pagamento foi feito
+        if ($rental->payment_status !== 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'O pagamento deve ser realizado antes de confirmar o recebimento'
+            ], 400);
+        }
+
+        // Verifica se já foi confirmado
+        if ($rental->picked_up_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'O recebimento já foi confirmado'
+            ], 400);
+        }
+
+        // Confirma o recebimento e marca como ativo
+        $rental->markAsPickedUp();
+
+        // TODO: Liberar pagamento para o proprietário via gateway de pagamento
+        // Por enquanto, apenas marca que o pagamento foi liberado
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Recebimento confirmado. O pagamento foi liberado para o proprietário.',
+            'data' => $rental->fresh()->load(['clothingItem', 'owner', 'renter'])
+        ]);
+    }
+
+    /**
+     * Obtém o QR Code de entrega para o locatário (após pagamento)
+     */
+    public function getDeliveryQRCode(Request $request, $id)
+    {
+        $rental = Rental::findOrFail($id);
+        $user = $request->user();
+
+        // Verifica se o usuário é o locatário
+        if ($rental->renter_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o locatário pode visualizar o QR Code de entrega'
+            ], 403);
+        }
+
+        // Verifica se o pagamento foi feito
+        if ($rental->payment_status !== 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'O pagamento deve ser realizado antes de visualizar o QR Code'
+            ], 400);
+        }
+
+        // Busca o QR Code
+        $negotiation = $rental->negotiation;
+        if (!$negotiation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Negociação não encontrada'
+            ], 404);
+        }
+
+        $checkpoint = \App\Models\QRCodeCheckpoint::where('negotiation_id', $negotiation->id)
+            ->where('type', 'delivery_to_renter')
+            ->first();
+
+        if (!$checkpoint) {
+            return response()->json([
+                'success' => false,
+                'message' => 'QR Code não encontrado'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $checkpoint
+        ]);
+    }
+
+    /**
+     * Confirma que o proprietário entregou a roupa (apenas proprietário)
+     */
+    public function confirmDelivery(Request $request, $id)
+    {
+        $rental = Rental::findOrFail($id);
+        $user = $request->user();
+
+        // Verifica se o usuário é o proprietário
+        if ($rental->owner_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o proprietário pode confirmar a entrega'
+            ], 403);
+        }
+
+        // Verifica se o pagamento foi feito
+        if ($rental->payment_status !== 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aguardando pagamento do locatário'
+            ], 400);
+        }
+
+        // Marca como pronto para retirada
+        if ($rental->status !== 'ready') {
+            $rental->markAsReady();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Entrega confirmada. Aguardando confirmação de recebimento do locatário.',
+            'data' => $rental->fresh()->load(['clothingItem', 'owner', 'renter'])
         ]);
     }
 }

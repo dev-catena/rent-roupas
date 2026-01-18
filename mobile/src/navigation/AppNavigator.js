@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { colors } from '../constants/colors';
 
 // Screens
 import HomeScreen from '../screens/Home/HomeScreen';
@@ -33,7 +34,7 @@ function HomeStack() {
       <Stack.Screen 
         name="HomeMain" 
         component={HomeScreen}
-        options={{ title: 'Rent Roupa' }}
+        options={{ title: 'Vestme' }}
       />
       <Stack.Screen 
         name="ItemDetail" 
@@ -49,6 +50,16 @@ function HomeStack() {
         name="VirtualTryOn" 
         component={VirtualTryOnScreen}
         options={{ title: 'Experimentação Virtual' }}
+      />
+      <Stack.Screen 
+        name="QRCodeGenerate" 
+        component={QRCodeGenerateScreen}
+        options={{ title: 'QR Code' }}
+      />
+      <Stack.Screen 
+        name="QRCodeScan" 
+        component={QRCodeScanScreen}
+        options={{ title: 'Escanear QR Code', headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -184,8 +195,8 @@ export default function AppNavigator() {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#6366f1',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.gray,
         headerShown: false,
       })}
     >

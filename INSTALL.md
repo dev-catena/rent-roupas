@@ -1,6 +1,6 @@
-# 🚀 Guia de Instalação - Rent Roupa
+# 🚀 Guia de Instalação - Vestme
 
-Este guia fornece instruções detalhadas para configurar o projeto Rent Roupa em seu ambiente de desenvolvimento.
+Este guia fornece instruções detalhadas para configurar o projeto Vestme em seu ambiente de desenvolvimento.
 
 ## 📋 Pré-requisitos
 
@@ -72,7 +72,7 @@ nano .env
 Configure as seguintes variáveis no `.env`:
 
 ```env
-APP_NAME="Rent Roupa"
+APP_NAME="Vestme"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
@@ -121,7 +121,7 @@ A API estará disponível em: `http://localhost:8000`
 curl http://localhost:8000/api
 
 # Deve retornar:
-# {"app":"Rent Roupa API","version":"1.0.0","status":"running"}
+# {"app":"Vestme API","version":"1.0.0","status":"running"}
 ```
 
 ## 📱 Instalação do Frontend Mobile

@@ -25,6 +25,8 @@ class User extends Authenticatable
         'city',
         'state',
         'zipcode',
+        'is_admin',
+        'is_blocked',
     ];
 
     protected $hidden = [
@@ -37,6 +39,8 @@ class User extends Authenticatable
         'password' => 'hashed',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
+        'is_admin' => 'boolean',
+        'is_blocked' => 'boolean',
     ];
 
     // Relacionamentos

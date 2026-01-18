@@ -10,7 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import api from '../../config/api';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 
 export default function ProfessionalsListScreen({ route, navigation }) {
   const { user } = useAuth();
@@ -212,7 +213,7 @@ export default function ProfessionalsListScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -268,7 +269,7 @@ export default function ProfessionalsListScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,
@@ -280,37 +281,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
     gap: 8,
   },
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: colors.gray,
     marginRight: 8,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
   },
   filterButtonActive: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
   },
   filterButtonText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     fontWeight: '600',
   },
   filterButtonTextActive: {
-    color: '#fff',
+    color: colors.white,
   },
   listContent: {
     padding: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -328,13 +329,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   avatarText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 20,
     fontWeight: '600',
   },
@@ -344,12 +345,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 4,
   },
   type: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     marginBottom: 4,
   },
   ratingContainer: {
@@ -362,7 +363,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: colors.gray,
   },
   verifiedBadge: {
     width: 28,
@@ -373,18 +374,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   verifiedText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   cardBody: {
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f6',
+    borderTopColor: colors.lightGray,
     paddingTop: 12,
   },
   bio: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: colors.textLight,
     marginBottom: 2,
   },
   price: {
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   expressBadge: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: colors.warningLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
 });
 

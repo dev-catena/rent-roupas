@@ -14,7 +14,7 @@ class ClothingItem extends Model
         'user_id',
         'title',
         'description',
-        'category',
+        'clothing_category_id',
         'gender',
         'color',
         'brand',
@@ -29,6 +29,8 @@ class ClothingItem extends Model
         'size',
         'shoe_size',
         'price_per_day',
+        'is_for_sale',
+        'sale_price',
         'is_available',
         'in_use',
         'current_rental_id',
@@ -49,6 +51,8 @@ class ClothingItem extends Model
         'inseam' => 'decimal:2',
         'shoe_size' => 'decimal:1',
         'price_per_day' => 'decimal:2',
+        'is_for_sale' => 'boolean',
+        'sale_price' => 'decimal:2',
         'is_available' => 'boolean',
         'in_use' => 'boolean',
         'available_from' => 'date',
@@ -62,6 +66,11 @@ class ClothingItem extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ClothingCategory::class, 'clothing_category_id');
     }
 
     public function photos()
@@ -94,6 +103,11 @@ class ClothingItem extends Model
         return $this->hasMany(Negotiation::class);
     }
 
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
+
     // Scopes
     public function scopeAvailable($query)
     {
@@ -101,9 +115,9 @@ class ClothingItem extends Model
                      ->where('in_use', false);
     }
 
-    public function scopeByCategory($query, $category)
+    public function scopeByCategory($query, $categoryId)
     {
-        return $query->where('category', $category);
+        return $query->where('clothing_category_id', $categoryId);
     }
 
     public function scopeByGender($query, $gender)

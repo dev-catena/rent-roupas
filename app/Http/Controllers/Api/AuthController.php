@@ -46,9 +46,13 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
+            $errors = $validator->errors();
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'message' => 'Dados inválidos',
+                'errors' => $errors,
+                'error_code' => 'VALIDATION_ERROR',
+                'details' => $errors->first()
             ], 422);
         }
 
@@ -115,18 +119,45 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $errors = $validator->errors();
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'message' => 'Dados inválidos',
+                'errors' => $errors,
+                'error_code' => 'VALIDATION_ERROR',
+                'details' => $errors->first()
             ], 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['As credenciais fornecidas estão incorretas.'],
+        if (!$user) {
+            \Log::warning('Tentativa de login com email inexistente', [
+                'email' => $request->email,
+                'ip' => $request->ip()
             ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Email não encontrado',
+                'error_code' => 'EMAIL_NOT_FOUND',
+                'details' => 'O email informado não está cadastrado no sistema.'
+            ], 401);
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            \Log::warning('Tentativa de login com senha incorreta', [
+                'email' => $request->email,
+                'user_id' => $user->id,
+                'ip' => $request->ip()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Senha incorreta',
+                'error_code' => 'INVALID_PASSWORD',
+                'details' => 'A senha informada está incorreta.'
+            ], 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -166,9 +197,13 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $errors = $validator->errors();
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'message' => 'Dados inválidos',
+                'errors' => $errors,
+                'error_code' => 'VALIDATION_ERROR',
+                'details' => $errors->first()
             ], 422);
         }
 

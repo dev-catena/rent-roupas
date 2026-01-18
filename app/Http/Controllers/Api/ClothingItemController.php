@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ClothingItem;
 use App\Models\ClothingPhoto;
+use App\Models\ClothingCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +18,11 @@ class ClothingItemController extends Controller
             ->available();
 
         // Filtros
-        if ($request->has('category')) {
-            $query->where('category', $request->category);
+        if ($request->has('clothing_category_id')) {
+            $query->where('clothing_category_id', $request->clothing_category_id);
+        } elseif ($request->has('category')) {
+            // Compatibilidade com versão antiga
+            $query->where('clothing_category_id', $request->category);
         }
 
         if ($request->has('gender')) {
@@ -56,7 +60,7 @@ class ClothingItemController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        $items = $query->paginate($request->get('per_page', 20));
+        $items = $query->with('category')->paginate($request->get('per_page', 20));
 
         return response()->json([
             'success' => true,
@@ -82,7 +86,7 @@ class ClothingItemController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'category' => 'required|in:dress,suit,shirt,pants,skirt,jacket,coat,shoes,accessory,other',
+            'clothing_category_id' => 'required|exists:clothing_categories,id',
             'gender' => 'required|in:male,female,unisex',
             'color' => 'nullable|string',
             'brand' => 'nullable|string',
@@ -97,6 +101,8 @@ class ClothingItemController extends Controller
             'size' => 'nullable|string',
             'shoe_size' => 'nullable|numeric|min:0',
             'price_per_day' => 'required|numeric|min:0',
+            'is_for_sale' => 'nullable|boolean',
+            'sale_price' => 'nullable|required_if:is_for_sale,true|numeric|min:0',
             'available_from' => 'nullable|date',
             'available_until' => 'nullable|date|after:available_from',
         ]);
@@ -125,12 +131,14 @@ class ClothingItemController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
-            'category' => 'sometimes|in:dress,suit,shirt,pants,skirt,jacket,coat,shoes,accessory,other',
+            'clothing_category_id' => 'sometimes|exists:clothing_categories,id',
             'gender' => 'sometimes|in:male,female,unisex',
             'color' => 'nullable|string',
             'brand' => 'nullable|string',
             'condition' => 'sometimes|in:new,like_new,good,fair',
             'price_per_day' => 'sometimes|numeric|min:0',
+            'is_for_sale' => 'nullable|boolean',
+            'sale_price' => 'nullable|required_if:is_for_sale,true|numeric|min:0',
             'is_available' => 'sometimes|boolean',
         ]);
 

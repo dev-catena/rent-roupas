@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
+import { formatCurrency, currencyToNumber } from '../../utils/currencyMask';
 
 export default function RentRequestScreen({ route, navigation }) {
   const { item } = route.params;
@@ -32,11 +34,18 @@ export default function RentRequestScreen({ route, navigation }) {
   
   // Dados da negociação
   const [message, setMessage] = useState('');
-  const [proposedPrice, setProposedPrice] = useState(item.price_per_day.toString());
+  // Inicializa com o preço da peça formatado (multiplica por 100 para ter centavos)
+  const initialPrice = item.price_per_day ? (item.price_per_day * 100).toString() : '0';
+  const [proposedPrice, setProposedPrice] = useState(formatCurrency(initialPrice));
+
+  function handlePriceChange(value) {
+    const masked = formatCurrency(value);
+    setProposedPrice(masked);
+  }
 
   function calculateTotal() {
     const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-    const price = parseFloat(proposedPrice) || 0;
+    const price = currencyToNumber(proposedPrice) || 0;
     const subtotal = days * price;
     const platformFee = subtotal * 0.10;
     const total = subtotal + platformFee;
@@ -66,7 +75,7 @@ export default function RentRequestScreen({ route, navigation }) {
       const requestData = {
         clothing_item_id: item.id,
         type: 'rental',
-        proposed_price: parseFloat(proposedPrice),
+        proposed_price: currencyToNumber(proposedPrice),
         proposed_start_date: startDate.toISOString().split('T')[0],
         proposed_end_date: endDate.toISOString().split('T')[0],
         initial_message: message,
@@ -207,9 +216,9 @@ export default function RentRequestScreen({ route, navigation }) {
           <TextInput
             style={styles.input}
             value={proposedPrice}
-            onChangeText={setProposedPrice}
-            keyboardType="decimal-pad"
-            placeholder="Ex: 50.00"
+            onChangeText={handlePriceChange}
+            keyboardType="numeric"
+            placeholder="R$ 0,00"
           />
         </View>
       </View>

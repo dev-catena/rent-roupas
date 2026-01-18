@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
 
 export default function RatingScreen({ route, navigation }) {
   const { rental, type } = route.params; // type: 'professional' ou 'owner'

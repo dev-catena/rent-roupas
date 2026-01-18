@@ -11,7 +11,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
 import { format } from 'date-fns';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 
 export default function ChatsScreen({ navigation }) {
   const { user } = useAuth();
@@ -126,7 +127,7 @@ export default function ChatsScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -157,7 +158,7 @@ export default function ChatsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,
@@ -171,20 +172,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: colors.lightGray,
     alignItems: 'center',
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   avatarText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -199,24 +200,24 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     flex: 1,
   },
   time: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: colors.textLight,
   },
   itemTitle: {
     fontSize: 14,
-    color: '#6366f1',
+    color: colors.primary,
     marginBottom: 4,
   },
   lastMessage: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
   },
   unreadBadge: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   unreadText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -235,14 +236,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#1f2937',
+    color: colors.text,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     textAlign: 'center',
   },
 });

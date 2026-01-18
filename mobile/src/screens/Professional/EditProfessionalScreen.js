@@ -9,7 +9,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'
+import { colors } from '../../constants/colors';;
 import * as Location from 'expo-location';
 import api from '../../config/api';
 
@@ -197,7 +198,7 @@ export default function EditProfessionalScreen({ navigation }) {
   if (loadingData) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Carregando dados...</Text>
       </View>
     );
@@ -293,7 +294,7 @@ export default function EditProfessionalScreen({ navigation }) {
         disabled={loadingLocation}
       >
         {loadingLocation ? (
-          <ActivityIndicator color="#374151" />
+          <ActivityIndicator color={colors.darkGray} />
         ) : (
           <Text style={styles.locationButtonText}>
             📍 {workshopLocation ? 'Localização do ateliê obtida ✓' : 'Atualizar localização do ateliê'}
@@ -329,7 +330,7 @@ export default function EditProfessionalScreen({ navigation }) {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.white} />
         ) : (
           <Text style={styles.saveButtonText}>Salvar Alterações</Text>
         )}
@@ -343,18 +344,18 @@ export default function EditProfessionalScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
   section: {
     padding: 20,
@@ -362,13 +363,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    color: colors.text,
     marginBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.darkGray,
     marginBottom: 8,
   },
   input: {
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.backgroundLight,
   },
   textArea: {
     height: 100,
@@ -394,19 +395,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioButtonSelected: {
-    borderColor: '#6366f1',
+    borderColor: colors.primary,
     backgroundColor: '#eef2ff',
   },
   radioText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: colors.gray,
   },
   radioTextSelected: {
-    color: '#6366f1',
+    color: colors.primary,
     fontWeight: '600',
   },
   locationButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.lightGray,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   locationButtonText: {
-    color: '#374151',
+    color: colors.darkGray,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -432,19 +433,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dayButtonSelected: {
-    borderColor: '#6366f1',
+    borderColor: colors.primary,
     backgroundColor: '#eef2ff',
   },
   dayText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: colors.gray,
     fontWeight: '600',
   },
   dayTextSelected: {
-    color: '#6366f1',
+    color: colors.primary,
   },
   saveButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: '600',
   },

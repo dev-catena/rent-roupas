@@ -1,10 +1,10 @@
-# 👗 Rent Roupa
+# 👗 Vestme
 
 Sistema completo de aluguel de roupas e sapatos para eventos e festas, conectando pessoas que precisam de roupas com quem pode emprestar e com profissionais que podem ajustar.
 
 ## 📋 Sobre o Projeto
 
-O Rent Roupa é uma plataforma que facilita o aluguel de roupas para eventos, oferecendo:
+O Vestme é uma plataforma que facilita o aluguel de roupas para eventos, oferecendo:
 
 - **Matching Inteligente**: Algoritmo que recomenda peças baseado nas medidas corporais do usuário
 - **Geolocalização**: Encontra peças e profissionais mais próximos
@@ -391,7 +391,7 @@ Desenvolvido com ❤️ para facilitar o acesso a roupas para eventos e festas.
 
 ## 📞 Suporte
 
-Para suporte, entre em contato através do email: suporte@rentroupa.com.br
+Para suporte, entre em contato através do email: suporte@vestme.cloud
 
 ---
 

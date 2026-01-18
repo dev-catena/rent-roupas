@@ -7,9 +7,12 @@ import {
   Alert,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
 
 export default function QRCodeScanScreen({ route, navigation }) {
+  const { rentalId } = route.params || {};
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -23,39 +26,92 @@ export default function QRCodeScanScreen({ route, navigation }) {
   async function handleBarCodeScanned({ data }) {
     if (scanned || processing) return;
     
+    // Valida se o QR code tem dados
+    if (!data || data.trim().length === 0) {
+      Alert.alert(
+        'Erro',
+        'QR Code inválido ou vazio. Tente escanear novamente.',
+        [
+          {
+            text: 'Tentar Novamente',
+            onPress: () => {
+              setScanned(false);
+              setProcessing(false);
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
     setScanned(true);
     setProcessing(true);
 
     try {
       const response = await api.post('/qrcode/scan', {
-        qr_code: data
+        qr_code: data.trim()
       });
 
       if (response.data.success) {
         const checkpoint = response.data.data;
         
-        // Notifica a tela anterior para atualizar
-        if (route.params?.onScanSuccess) {
-          route.params.onScanSuccess();
+        // Se for entrega ao locatário, marca o aluguel como ready
+        if (checkpoint.type === 'delivery_to_renter' && rentalId) {
+          Alert.alert(
+            '✅ Entrega Confirmada!',
+            'O QR Code foi escaneado com sucesso. A roupa está pronta para retirada.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // Força atualização ao voltar
+                  navigation.goBack();
+                }
+              }
+            ]
+          );
+        } else {
+          Alert.alert(
+            '✅ QR Code Escaneado!',
+            `Checkpoint registrado com sucesso!\n\nTipo: ${getTypeLabel(checkpoint.type)}`,
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.goBack()
+              }
+            ]
+          );
         }
-        
-        Alert.alert(
-          '✅ QR Code Escaneado!',
-          `Checkpoint registrado com sucesso!\n\nTipo: ${getTypeLabel(checkpoint.type)}`,
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack()
-            }
-          ]
-        );
       }
     } catch (error) {
       console.error('Erro ao escanear QR Code:', error);
+      console.error('Erro completo:', JSON.stringify(error.response?.data, null, 2));
+      
+      let errorMessage = 'Não foi possível processar o QR Code';
+      
+      if (error.response?.status === 422) {
+        // Erro de validação
+        const errors = error.response?.data?.errors;
+        if (errors && errors.qr_code) {
+          errorMessage = `Erro de validação: ${errors.qr_code[0]}`;
+        } else {
+          errorMessage = error.response?.data?.message || 'Dados inválidos. Verifique o QR Code.';
+        }
+      } else if (error.response?.status === 404) {
+        errorMessage = error.response?.data?.message || 'QR Code não encontrado ou inválido';
+      } else if (error.response?.status === 403) {
+        errorMessage = error.response?.data?.message || 'Você não tem permissão para escanear este QR Code';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response?.data?.message || 'QR Code já foi utilizado ou inválido';
+      } else {
+        errorMessage = error.response?.data?.message || 
+                      error.response?.data?.error || 
+                      'Não foi possível processar o QR Code';
+      }
       
       Alert.alert(
         'Erro',
-        error.response?.data?.message || 'Não foi possível processar o QR Code',
+        errorMessage,
         [
           {
             text: 'Tentar Novamente',

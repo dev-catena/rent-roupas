@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../../config/api';
+import { colors } from '../../constants/colors';
+import SafeIcon from '../../components/SafeIcon';
 
 export default function EditItemScreen({ navigation, route }) {
   const { itemId } = route.params;
@@ -35,6 +37,8 @@ export default function EditItemScreen({ navigation, route }) {
     hip: '',
     length: '',
     price_per_day: '',
+    is_for_sale: false,
+    sale_price: '',
   });
 
   useEffect(() => {
@@ -62,6 +66,8 @@ export default function EditItemScreen({ navigation, route }) {
           hip: item.hip || '',
           length: item.length || '',
           price_per_day: item.price_per_day ? item.price_per_day.toString() : '',
+          is_for_sale: item.is_for_sale || false,
+          sale_price: item.sale_price ? item.sale_price.toString() : '',
         });
         setExistingPhotos(item.photos || []);
       }
@@ -74,6 +80,28 @@ export default function EditItemScreen({ navigation, route }) {
     }
   }
 
+  // Função para tirar foto com a câmera
+  async function takePhoto() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão negada', 'Permita o acesso à câmera para tirar fotos');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: false,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const newPhotos = [...photos, result.assets[0]];
+      console.log('Foto da câmera adicionada. Total:', newPhotos.length);
+      setPhotos(newPhotos);
+    }
+  }
+
+  // Função para escolher da galeria
   async function pickImages() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -81,9 +109,24 @@ export default function EditItemScreen({ navigation, route }) {
       quality: 0.8,
     });
 
-    if (!result.canceled) {
-      setPhotos([...photos, ...result.assets]);
+    if (!result.canceled && result.assets) {
+      const newPhotos = [...photos, ...result.assets];
+      console.log('Fotos adicionadas. Total:', newPhotos.length);
+      setPhotos(newPhotos);
     }
+  }
+
+  // Função para mostrar opções de foto
+  function showPhotoOptions() {
+    Alert.alert(
+      'Adicionar Foto',
+      'Escolha uma opção',
+      [
+        { text: 'Câmera', onPress: takePhoto },
+        { text: 'Galeria', onPress: pickImages },
+        { text: 'Cancelar', style: 'cancel' },
+      ]
+    );
   }
 
   async function handleDeleteExistingPhoto(photoId) {
@@ -119,6 +162,11 @@ export default function EditItemScreen({ navigation, route }) {
       return;
     }
 
+    if (formData.is_for_sale && !formData.sale_price) {
+      Alert.alert('Erro', 'Informe o preço de venda');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -128,20 +176,34 @@ export default function EditItemScreen({ navigation, route }) {
       if (response.data.success) {
         // Se há novas fotos, faz o upload
         if (photos.length > 0) {
-          const uploadData = new FormData();
-          photos.forEach((photo, index) => {
-            uploadData.append('photos[]', {
-              uri: photo.uri,
-              type: 'image/jpeg',
-              name: `photo_${index}.jpg`,
+          try {
+            const uploadData = new FormData();
+            photos.forEach((photo, index) => {
+              uploadData.append('photos[]', {
+                uri: photo.uri,
+                type: 'image/jpeg',
+                name: `photo_${index}.jpg`,
+              });
             });
-          });
 
-          await api.post(`/clothing-items/${itemId}/photos`, uploadData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+            const uploadResponse = await api.post(`/clothing-items/${itemId}/photos`, uploadData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+
+            if (uploadResponse.data.success) {
+              // Recarrega as fotos do servidor para mostrar as novas
+              const itemResponse = await api.get(`/clothing-items/${itemId}`);
+              if (itemResponse.data.success) {
+                setExistingPhotos(itemResponse.data.data.photos || []);
+                setPhotos([]); // Limpa as fotos novas após upload
+              }
+            }
+          } catch (uploadError) {
+            console.error('Erro ao fazer upload das fotos:', uploadError);
+            Alert.alert('Aviso', 'Peça atualizada, mas houve erro ao enviar algumas fotos');
+          }
         }
 
         Alert.alert('Sucesso', 'Peça atualizada com sucesso!', [
@@ -184,7 +246,7 @@ export default function EditItemScreen({ navigation, route }) {
                     style={styles.photoDeleteButton}
                     onPress={() => handleDeleteExistingPhoto(photo.id)}
                   >
-                    <Text style={styles.photoDeleteText}>✕</Text>
+                    <SafeIcon name="close" size={16} color="#fff" />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -195,31 +257,49 @@ export default function EditItemScreen({ navigation, route }) {
         {/* Novas fotos */}
         {photos.length > 0 && (
           <>
-            <Text style={styles.label}>Novas fotos</Text>
-            <ScrollView horizontal style={styles.photoPreview}>
-              {photos.map((photo, index) => (
-                <View key={index} style={styles.photoContainer}>
-                  <Image
-                    source={{ uri: photo.uri }}
-                    style={styles.photoThumb}
-                  />
-                  <TouchableOpacity
-                    style={styles.photoDeleteButton}
-                    onPress={() => removeNewPhoto(index)}
-                  >
-                    <Text style={styles.photoDeleteText}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+            <Text style={styles.label}>Novas fotos ({photos.length})</Text>
+            <ScrollView 
+              horizontal 
+              style={styles.photoPreview}
+              showsHorizontalScrollIndicator={false}
+            >
+              {photos.map((photo, index) => {
+                const photoUri = photo.uri || photo.uri || '';
+                return (
+                  <View key={`new-${index}-${photoUri}`} style={styles.photoContainer}>
+                    <Image
+                      source={{ uri: photoUri }}
+                      style={styles.photoThumb}
+                      onError={(e) => {
+                        console.error('Erro ao carregar foto:', e.nativeEvent.error);
+                      }}
+                    />
+                    <TouchableOpacity
+                      style={styles.photoDeleteButton}
+                      onPress={() => removeNewPhoto(index)}
+                    >
+                      <SafeIcon name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
             </ScrollView>
           </>
         )}
 
-        <TouchableOpacity style={styles.photoButton} onPress={pickImages}>
-          <Text style={styles.photoButtonText}>
-            📷 Adicionar Mais Fotos
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.photoButtonsRow}>
+          <TouchableOpacity style={[styles.photoButton, styles.photoButtonHalf]} onPress={takePhoto}>
+            <SafeIcon name="camera" size={28} color={colors.primary} style={styles.photoButtonIcon} />
+            <Text style={styles.photoButtonText}>Tirar Foto</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.photoButton, styles.photoButtonHalf]} onPress={pickImages}>
+            <SafeIcon name="images" size={28} color={colors.primary} style={styles.photoButtonIcon} />
+            <Text style={styles.photoButtonText}>Galeria</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.photoCountText}>
+          {photos.length > 0 && `${photos.length} nova(s) foto(s) para adicionar`}
+        </Text>
       </View>
 
       <View style={styles.section}>
@@ -257,6 +337,35 @@ export default function EditItemScreen({ navigation, route }) {
             keyboardType="decimal-pad"
           />
         </View>
+
+        <View style={styles.inputContainer}>
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              style={styles.checkbox}
+              onPress={() => setFormData({ ...formData, is_for_sale: !formData.is_for_sale })}
+            >
+              {formData.is_for_sale && (
+                <SafeIcon name="checkmark" size={20} color={colors.primary} />
+              )}
+            </TouchableOpacity>
+            <Text style={styles.checkboxLabel}>
+              Este produto também está à venda
+            </Text>
+          </View>
+        </View>
+
+        {formData.is_for_sale && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Preço de Venda (R$) *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="200.00"
+              value={formData.sale_price}
+              onChangeText={(value) => setFormData({ ...formData, sale_price: value })}
+              keyboardType="decimal-pad"
+            />
+          </View>
+        )}
 
         <View style={styles.row}>
           <View style={styles.inputContainer}>
@@ -409,6 +518,11 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     marginBottom: 16,
   },
+  photoButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
   photoButton: {
     backgroundColor: '#f3f4f6',
     padding: 16,
@@ -417,12 +531,23 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#d1d5db',
     borderStyle: 'dashed',
-    marginTop: 12,
+  },
+  photoButtonHalf: {
+    flex: 1,
+  },
+  photoButtonIcon: {
+    marginBottom: 8,
   },
   photoButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6b7280',
     fontWeight: '600',
+  },
+  photoCountText: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 8,
+    textAlign: 'center',
   },
   photoPreview: {
     marginTop: 12,
@@ -490,6 +615,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: '#6366f1',
+    borderRadius: 4,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: '#374151',
+    flex: 1,
   },
 });
 

@@ -1,0 +1,61 @@
+/* Estilos globais para botões - Tons Pastéis */
+.btn-primary {
+  background: #A8D5E2; /* Azul pastel */
+  color: #2C5F7D; /* Texto escuro para contraste */
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(168, 213, 226, 0.3);
+}
+
+.btn-primary:hover {
+  background: #8FC4D4; /* Azul pastel mais escuro */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(168, 213, 226, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #D4A5F5; /* Roxo pastel */
+  color: #6B3A8A; /* Texto escuro para contraste */
+  border: 2px solid #D4A5F5;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #C28FE8; /* Roxo pastel mais escuro */
+  border-color: #C28FE8;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: #FFB6C1; /* Rosa pastel */
+  color: #8B4A5C; /* Texto escuro para contraste */
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  background: #FF9FB0; /* Rosa pastel mais escuro */
+  transform: translateY(-2px);
+}
+
